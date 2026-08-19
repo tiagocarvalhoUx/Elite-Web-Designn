@@ -13,6 +13,7 @@ npm run build        # type-check (vue-tsc) + build de produção
 npm run preview      # serve o build
 npm run type-check   # apenas o type-check
 npm run assets       # regenera src/assets/** e public/** a partir da arte original
+npm run supabase:check # verifica schema, bucket e políticas de RLS
 ```
 
 ## Onde mexer
@@ -47,6 +48,9 @@ O portfólio pode ser gerenciado pelo painel em `/admin`, com os dados no Supaba
 2. Rode [`supabase/schema.sql`](supabase/schema.sql) no SQL Editor. Ele cria a
    tabela `projects`, o bucket `portfolio` e as políticas de RLS.
 3. Crie o usuário administrador em Authentication → Users → Add user.
+4. Confira tudo com `npm run supabase:check` — ele verifica, usando só a chave
+   pública, se a tabela e o bucket existem e se a RLS realmente barra escrita
+   anônima.
 
 > **A secret key (`sb_secret_…`) nunca entra neste projeto.** Ela ignora as
 > políticas de RLS, e qualquer variável `VITE_*` é compilada dentro do bundle
