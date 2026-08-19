@@ -1,0 +1,38 @@
+:root {
+  /* Inferred from the supplied raster artwork */
+  --ewd-bg: #070706;
+  --ewd-surface: #0D0C0A;
+  --ewd-surface-soft: #15120D;
+  --ewd-gold: #AA7E31;
+  --ewd-gold-bright: #D3A53C;
+  --ewd-gold-deep: #76531A;
+  --ewd-ivory: #D9CDBA;
+  --ewd-text: #CFC3B2;
+  --ewd-text-muted: #938879;
+  --ewd-border-gold: rgba(170, 126, 49, .72);
+  --ewd-shadow-gold: 0 0 28px rgba(211, 165, 60, .12);
+}
+
+/* Prefer real HTML buttons over raster button images for accessibility/responsiveness. */
+.ewd-button {
+  min-height: 44px;
+  padding: 0.8rem 1.35rem;
+  border: 1px solid var(--ewd-border-gold);
+  color: var(--ewd-gold-bright);
+  background: transparent;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  transition: transform .2s ease, background-color .2s ease, color .2s ease;
+}
+
+.ewd-button:hover {
+  transform: translateY(-1px);
+  background: var(--ewd-gold-bright);
+  color: var(--ewd-bg);
+}
+
+.ewd-button--filled {
+  background: linear-gradient(135deg, #B98527, #D3A53C);
+  color: #151006;
+  border-color: transparent;
+}

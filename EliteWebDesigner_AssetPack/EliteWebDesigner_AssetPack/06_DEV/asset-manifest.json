@@ -1,0 +1,351 @@
+{
+  "assetCount": 58,
+  "assets": [
+    {
+      "path": "00_REFERENCE/homepage-complete.png",
+      "bytes": 3285172,
+      "width": 1152,
+      "height": 2048
+    },
+    {
+      "path": "00_REFERENCE/project-caetano-complete.png",
+      "bytes": 4634955,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "00_REFERENCE/project-coffee-complete.png",
+      "bytes": 5167059,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "00_REFERENCE/project-marcenaria-complete.png",
+      "bytes": 4822783,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "00_REFERENCE/project-petshop-complete.png",
+      "bytes": 4741970,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "00_REFERENCE/project-reza-vela-complete.png",
+      "bytes": 4671831,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "01_BRAND/footer-brand-lockup-transparent.png",
+      "bytes": 39860,
+      "width": 215,
+      "height": 157
+    },
+    {
+      "path": "01_BRAND/footer-brand-lockup.png",
+      "bytes": 44303,
+      "width": 215,
+      "height": 190
+    },
+    {
+      "path": "01_BRAND/logo-wd-gold-on-dark.png",
+      "bytes": 6158,
+      "width": 85,
+      "height": 65
+    },
+    {
+      "path": "01_BRAND/logo-wd-gold-transparent.png",
+      "bytes": 6252,
+      "width": 85,
+      "height": 57
+    },
+    {
+      "path": "02_UI/buttons/button-enviar-solicitacao.png",
+      "bytes": 9351,
+      "width": 215,
+      "height": 37
+    },
+    {
+      "path": "02_UI/buttons/button-pedir-orcamento.png",
+      "bytes": 7778,
+      "width": 185,
+      "height": 44
+    },
+    {
+      "path": "02_UI/buttons/button-solicitar-proposta.png",
+      "bytes": 11449,
+      "width": 212,
+      "height": 46
+    },
+    {
+      "path": "02_UI/buttons/button-ver-portfolio.png",
+      "bytes": 9486,
+      "width": 186,
+      "height": 46
+    },
+    {
+      "path": "02_UI/dividers/divider-diamond-on-dark.png",
+      "bytes": 10618,
+      "width": 440,
+      "height": 27
+    },
+    {
+      "path": "02_UI/dividers/divider-diamond-transparent.png",
+      "bytes": 7818,
+      "width": 419,
+      "height": 19
+    },
+    {
+      "path": "02_UI/dividers/divider-diamond-vector.svg",
+      "bytes": 525
+    },
+    {
+      "path": "02_UI/sections/contact-section.png",
+      "bytes": 208285,
+      "width": 1117,
+      "height": 304
+    },
+    {
+      "path": "02_UI/sections/footer-reference.png",
+      "bytes": 245306,
+      "width": 1152,
+      "height": 206
+    },
+    {
+      "path": "02_UI/sections/hero-reference.png",
+      "bytes": 871248,
+      "width": 1152,
+      "height": 716
+    },
+    {
+      "path": "02_UI/sections/navbar-reference.png",
+      "bytes": 54182,
+      "width": 1152,
+      "height": 74
+    },
+    {
+      "path": "02_UI/sections/portfolio-strip.png",
+      "bytes": 395014,
+      "width": 1117,
+      "height": 350
+    },
+    {
+      "path": "02_UI/sections/quote-stats-strip.png",
+      "bytes": 211580,
+      "width": 1117,
+      "height": 223
+    },
+    {
+      "path": "02_UI/sections/services-strip.png",
+      "bytes": 172360,
+      "width": 1117,
+      "height": 175
+    },
+    {
+      "path": "03_HERO/hero-mrv-laptop.png",
+      "bytes": 245535,
+      "width": 685,
+      "height": 345
+    },
+    {
+      "path": "04_PORTFOLIO/cards/card-bella-store.png",
+      "bytes": 83584,
+      "width": 262,
+      "height": 287
+    },
+    {
+      "path": "04_PORTFOLIO/cards/card-clinica-vida.png",
+      "bytes": 89064,
+      "width": 272,
+      "height": 287
+    },
+    {
+      "path": "04_PORTFOLIO/cards/card-mrv.png",
+      "bytes": 84660,
+      "width": 260,
+      "height": 287
+    },
+    {
+      "path": "04_PORTFOLIO/cards/card-solarhome.png",
+      "bytes": 94779,
+      "width": 277,
+      "height": 287
+    },
+    {
+      "path": "04_PORTFOLIO/mockups/mockup-caetano-laptop.png",
+      "bytes": 1779978,
+      "width": 1700,
+      "height": 1030
+    },
+    {
+      "path": "04_PORTFOLIO/mockups/mockup-coffee-phone.png",
+      "bytes": 787195,
+      "width": 605,
+      "height": 1195
+    },
+    {
+      "path": "04_PORTFOLIO/mockups/mockup-marcenaria-laptop.png",
+      "bytes": 1873421,
+      "width": 1720,
+      "height": 1020
+    },
+    {
+      "path": "04_PORTFOLIO/mockups/mockup-petshop-laptop.png",
+      "bytes": 1849085,
+      "width": 1745,
+      "height": 1025
+    },
+    {
+      "path": "04_PORTFOLIO/mockups/mockup-reza-vela-laptop.png",
+      "bytes": 1775126,
+      "width": 1760,
+      "height": 1040
+    },
+    {
+      "path": "04_PORTFOLIO/showcases/showcase-caetano-hidraulica.png",
+      "bytes": 4634955,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "04_PORTFOLIO/showcases/showcase-coffee-app.png",
+      "bytes": 5167059,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "04_PORTFOLIO/showcases/showcase-marcenaria.png",
+      "bytes": 4822783,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "04_PORTFOLIO/showcases/showcase-petshop.png",
+      "bytes": 4741970,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "04_PORTFOLIO/showcases/showcase-reza-vela.png",
+      "bytes": 4671831,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/01_BRAND__footer-brand-lockup-transparent.webp",
+      "bytes": 4290,
+      "width": 215,
+      "height": 157
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/01_BRAND__footer-brand-lockup.webp",
+      "bytes": 4372,
+      "width": 215,
+      "height": 190
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/01_BRAND__logo-wd-gold-on-dark.webp",
+      "bytes": 1132,
+      "width": 85,
+      "height": 65
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/01_BRAND__logo-wd-gold-transparent.webp",
+      "bytes": 1074,
+      "width": 85,
+      "height": 57
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/03_HERO__hero-mrv-laptop.webp",
+      "bytes": 18702,
+      "width": 685,
+      "height": 345
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__cards__card-bella-store.webp",
+      "bytes": 9350,
+      "width": 262,
+      "height": 287
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__cards__card-clinica-vida.webp",
+      "bytes": 7602,
+      "width": 272,
+      "height": 287
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__cards__card-mrv.webp",
+      "bytes": 9344,
+      "width": 260,
+      "height": 287
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__cards__card-solarhome.webp",
+      "bytes": 10524,
+      "width": 277,
+      "height": 287
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__mockups__mockup-caetano-laptop.webp",
+      "bytes": 142350,
+      "width": 1700,
+      "height": 1030
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__mockups__mockup-coffee-phone.webp",
+      "bytes": 76054,
+      "width": 605,
+      "height": 1195
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__mockups__mockup-marcenaria-laptop.webp",
+      "bytes": 139978,
+      "width": 1720,
+      "height": 1020
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__mockups__mockup-petshop-laptop.webp",
+      "bytes": 132138,
+      "width": 1745,
+      "height": 1025
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__mockups__mockup-reza-vela-laptop.webp",
+      "bytes": 124580,
+      "width": 1760,
+      "height": 1040
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__showcases__showcase-caetano-hidraulica.webp",
+      "bytes": 192156,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__showcases__showcase-coffee-app.webp",
+      "bytes": 222670,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__showcases__showcase-marcenaria.webp",
+      "bytes": 195406,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__showcases__showcase-petshop.webp",
+      "bytes": 184726,
+      "width": 2048,
+      "height": 1536
+    },
+    {
+      "path": "05_WEB_OPTIMIZED/04_PORTFOLIO__showcases__showcase-reza-vela.webp",
+      "bytes": 177106,
+      "width": 2048,
+      "height": 1536
+    }
+  ]
+}

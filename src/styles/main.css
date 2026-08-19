@@ -1,0 +1,189 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   Design tokens — Elite Web Designer
+   Paleta derivada da arte original (mármore preto + veios dourados).
+   ========================================================================== */
+@theme {
+  --color-ink-950: #050504;
+  --color-ink-900: #070706;
+  --color-ink-850: #0a0908;
+  --color-ink-800: #0d0c0a;
+  --color-ink-700: #11100e;
+  --color-ink-600: #15120d;
+
+  --color-gold-200: #e6c67d;
+  --color-gold-300: #d7b561;
+  --color-gold-400: #c99b3b;
+  --color-gold-500: #aa7e31;
+  --color-gold-600: #7f5a1d;
+  --color-gold-700: #553c13;
+
+  --color-ivory: #ddd2c0;
+  --color-sand: #cfc3b2;
+  --color-muted: #9c9182;
+
+  --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  --text-eyebrow: 0.72rem;
+  --text-eyebrow--line-height: 1.4;
+
+  --ease-luxe: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --shadow-luxe: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(201, 155, 59, 0.06);
+  --shadow-lift: 0 18px 44px rgba(0, 0, 0, 0.6), 0 0 28px rgba(201, 155, 59, 0.1);
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+@layer base {
+  :root {
+    color-scheme: dark;
+    --rule: rgba(201, 155, 59, 0.22);
+    --shell: min(1280px, 100%);
+    --gutter: 1.25rem;
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+  }
+
+  @media (min-width: 768px) {
+    :root { --gutter: 2rem; }
+  }
+  @media (min-width: 1280px) {
+    :root { --gutter: 3rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root { scroll-behavior: auto; }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink-900);
+    color: var(--color-sand);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    font-weight: 300;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.06;
+    color: var(--color-ivory);
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  img, svg, video {
+    display: block;
+    max-width: 100%;
+  }
+
+  ::selection {
+    background: var(--color-gold-400);
+    color: var(--color-ink-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-gold-300);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* O anel de foco padrão já é suficiente; evita duplicar contorno em controles. */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* ==========================================================================
+   Utilities semânticas
+   ========================================================================== */
+
+/* Caixa alta espaçada usada em eyebrows, navegação, rótulos e categorias. */
+@utility tracking-luxe {
+  letter-spacing: 0.24em;
+}
+
+@utility label-caps {
+  font-family: var(--font-sans);
+  font-size: var(--text-eyebrow);
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+
+/* Versaletes: "Presença Digital" nasce com a inicial alta, como na arte original. */
+@utility display-caps {
+  font-family: var(--font-display);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.02em;
+}
+
+@utility text-gold-gradient {
+  background: linear-gradient(135deg, #76531a 0%, #c79635 38%, #e6c67d 54%, #a97827 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility surface-luxury {
+  background:
+    linear-gradient(180deg, rgba(21, 18, 13, 0.72) 0%, rgba(7, 7, 6, 0.72) 100%);
+  border: 1px solid var(--rule);
+}
+
+@utility section-y {
+  padding-block: clamp(4rem, 8vw, 7.5rem);
+}
+
+/* ==========================================================================
+   Scroll reveal — o conteúdo permanece visível sem JS e sem movimento.
+   ========================================================================== */
+@layer components {
+  [data-reveal] {
+    opacity: 1;
+  }
+
+  html.js [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.7s var(--ease-luxe),
+      transform 0.7s var(--ease-luxe);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  html.js [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html.js [data-reveal] {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
