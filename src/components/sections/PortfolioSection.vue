@@ -1,17 +1,24 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { projects, type PortfolioProject } from '@/data/portfolio'
-import { adminProjects } from '@/data/adminProjects'
+import { loadRemoteProjects, remoteProjects } from '@/data/publicProjects'
 import SectionHeading from '@/components/ui/SectionHeading.vue'
 import SiteContainer from '@/components/ui/SiteContainer.vue'
 import ProjectCard from '@/components/ui/ProjectCard.vue'
 import ProjectLightbox from '@/components/ui/ProjectLightbox.vue'
 
 const selected = ref<PortfolioProject | null>(null)
-const visibleProjects = computed(() => [
-  ...adminProjects.value.filter((project) => project.active),
-  ...projects,
-])
+
+/**
+ * Projetos cadastrados no painel entram na frente dos estáticos. Se o Supabase
+ * estiver fora do ar ou não configurado, a lista estática garante que a seção
+ * nunca apareça vazia.
+ */
+const visibleProjects = computed(() => [...remoteProjects.value, ...projects])
+
+onMounted(() => {
+  void loadRemoteProjects()
+})
 </script>
 
 <template>

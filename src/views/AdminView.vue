@@ -1,23 +1,33 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, reactive, ref } from 'vue'
+import type { Session } from '@supabase/supabase-js'
 import {
   adminProjects,
+  loadProjects,
+  projectsError,
+  projectsLoading,
   removeAdminProject,
   saveAdminProject,
   toggleAdminProject,
+  uploadProjectImage,
   type AdminProject,
 } from '@/data/adminProjects'
+import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 type Page = 'dashboard' | 'projects' | 'editor'
 
-const AUTH_KEY = 'elite-admin-auth'
-const isAuthenticated = ref(sessionStorage.getItem(AUTH_KEY) === 'true')
+const session = ref<Session | null>(null)
+const isAuthenticated = computed(() => session.value !== null)
+const authReady = ref(false)
 const loginError = ref('')
+const loginLoading = ref(false)
+
 const page = ref<Page>('dashboard')
 const query = ref('')
 const status = ref('all')
 const editingId = ref<string | null>(null)
 const formError = ref('')
+const saving = ref(false)
 
 const credentials = reactive({ email: '', password: '' })
 const form = reactive({
@@ -26,37 +36,94 @@ const form = reactive({
   year: new Date().getFullYear(),
   description: '',
   href: '',
-  image: '',
   active: true,
+  /** Blob otimizado aguardando upload; nulo quando a imagem não mudou. */
+  imageBlob: null as Blob | null,
+  /** URL só para exibir a prévia (object URL local ou URL pública do Storage). */
+  imagePreview: '',
+  /** Caminho já gravado no bucket, ao editar um projeto existente. */
+  imagePath: '',
 })
 
-const filteredProjects = computed(() => adminProjects.value.filter((project) => {
-  const matchesQuery = `${project.title} ${project.category}`.toLowerCase().includes(query.value.toLowerCase())
-  const matchesStatus = status.value === 'all' || (status.value === 'active' ? project.active : !project.active)
-  return matchesQuery && matchesStatus
-}))
+let previewObjectUrl = ''
 
-function login(): void {
-  const expectedEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@elite.com'
-  const expectedPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'elite123'
-  if (credentials.email === expectedEmail && credentials.password === expectedPassword) {
-    sessionStorage.setItem(AUTH_KEY, 'true')
-    isAuthenticated.value = true
-    loginError.value = ''
-  } else loginError.value = 'E-mail ou senha incorretos.'
+function setPreview(url: string, isObjectUrl: boolean): void {
+  if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl)
+  previewObjectUrl = isObjectUrl ? url : ''
+  form.imagePreview = url
 }
 
-function logout(): void {
-  sessionStorage.removeItem(AUTH_KEY)
-  isAuthenticated.value = false
+const filteredProjects = computed(() =>
+  adminProjects.value.filter((project) => {
+    const matchesQuery = `${project.title} ${project.category}`
+      .toLowerCase()
+      .includes(query.value.toLowerCase())
+    const matchesStatus =
+      status.value === 'all' || (status.value === 'active' ? project.active : !project.active)
+    return matchesQuery && matchesStatus
+  }),
+)
+
+onMounted(async () => {
+  if (!isSupabaseConfigured || !supabase) {
+    authReady.value = true
+    return
+  }
+  const { data } = await supabase.auth.getSession()
+  session.value = data.session
+  authReady.value = true
+  if (session.value) await loadProjects()
+
+  supabase.auth.onAuthStateChange((_event, next) => {
+    session.value = next
+    if (next) void loadProjects()
+    else adminProjects.value = []
+  })
+})
+
+onBeforeUnmount(() => {
+  if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl)
+})
+
+async function login(): Promise<void> {
+  if (!supabase) {
+    loginError.value = 'Supabase não configurado. Defina as variáveis em .env.local.'
+    return
+  }
+  loginLoading.value = true
+  loginError.value = ''
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email: credentials.email.trim(),
+    password: credentials.password,
+  })
+
+  loginLoading.value = false
+  if (error) {
+    loginError.value = 'E-mail ou senha incorretos.'
+    return
+  }
+  credentials.password = ''
+}
+
+async function logout(): Promise<void> {
+  await supabase?.auth.signOut()
+  page.value = 'dashboard'
 }
 
 function resetForm(): void {
   editingId.value = null
   formError.value = ''
+  setPreview('', false)
   Object.assign(form, {
-    title: '', category: 'Site institucional', year: new Date().getFullYear(),
-    description: '', href: '', image: '', active: true,
+    title: '',
+    category: 'Site institucional',
+    year: new Date().getFullYear(),
+    description: '',
+    href: '',
+    active: true,
+    imageBlob: null,
+    imagePath: '',
   })
 }
 
@@ -70,28 +137,31 @@ function openEditor(project?: AdminProject): void {
       year: project.year,
       description: project.description,
       href: project.href ?? '',
-      image: project.full,
       active: project.active,
+      imagePath: project.imagePath,
+      imageBlob: null,
     })
+    setPreview(project.full, false)
   }
   page.value = 'editor'
 }
 
+/** Redimensiona e recomprime no navegador antes de subir — economiza banda e Storage. */
 async function onImage(event: Event): Promise<void> {
-  const file = (event.target as HTMLInputElement).files?.[0]
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
   if (!file) return
+
   if (file.size > 15_000_000) {
     formError.value = 'A imagem é muito grande. Escolha um arquivo de até 15 MB.'
-    ;(event.target as HTMLInputElement).value = ''
+    input.value = ''
     return
   }
 
   try {
     formError.value = 'Otimizando imagem...'
     const bitmap = await createImageBitmap(file)
-    const maxWidth = 1800
-    const maxHeight = 1200
-    const scale = Math.min(1, maxWidth / bitmap.width, maxHeight / bitmap.height)
+    const scale = Math.min(1, 1800 / bitmap.width, 1200 / bitmap.height)
     const canvas = document.createElement('canvas')
     canvas.width = Math.round(bitmap.width * scale)
     canvas.height = Math.round(bitmap.height * scale)
@@ -100,25 +170,24 @@ async function onImage(event: Event): Promise<void> {
     context.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
     bitmap.close()
 
-    let quality = 0.86
-    let optimized = canvas.toDataURL('image/webp', quality)
-    while (optimized.length > 1_800_000 && quality > 0.5) {
-      quality -= 0.08
-      optimized = canvas.toDataURL('image/webp', quality)
-    }
-    if (optimized.length > 2_200_000) throw new Error('Imagem não pôde ser reduzida')
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/webp', 0.86),
+    )
+    if (!blob) throw new Error('Conversão falhou')
 
-    form.image = optimized
+    form.imageBlob = blob
+    setPreview(URL.createObjectURL(blob), true)
     formError.value = ''
   } catch {
     formError.value = 'Não foi possível otimizar essa imagem. Tente usar JPG, PNG ou WebP.'
-    ;(event.target as HTMLInputElement).value = ''
+    input.value = ''
   }
 }
 
-function submitProject(): void {
+async function submitProject(): Promise<void> {
   formError.value = ''
-  if (!form.image) {
+
+  if (!form.imageBlob && !form.imagePath) {
     formError.value = 'Selecione uma imagem para o projeto.'
     return
   }
@@ -126,33 +195,59 @@ function submitProject(): void {
     formError.value = 'Preencha título, descrição e categoria.'
     return
   }
-  const existing = adminProjects.value.find((project) => project.id === editingId.value)
-  const id = editingId.value ?? `${form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${Date.now()}`
-  const saved = saveAdminProject({
-    id,
-    title: form.title,
-    category: form.category,
-    year: Number(form.year),
-    description: form.description,
-    href: form.href || undefined,
-    src: form.image,
-    srcset: `${form.image} 1400w`,
-    full: form.image,
-    alt: `Mockup do projeto ${form.title}.`,
-    active: form.active,
-    createdAt: existing?.createdAt ?? new Date().toISOString(),
-  })
-  if (!saved) {
-    formError.value = 'O navegador ficou sem espaço para salvar. Use uma imagem menor ou exclua um projeto antigo.'
-    return
+
+  saving.value = true
+  try {
+    const previousPath = form.imagePath
+    const imagePath = form.imageBlob
+      ? await uploadProjectImage(form.imageBlob, form.title)
+      : previousPath
+
+    await saveAdminProject({
+      id: editingId.value ?? undefined,
+      title: form.title,
+      category: form.category,
+      year: Number(form.year),
+      description: form.description,
+      href: form.href,
+      imagePath,
+      active: form.active,
+      previousImagePath: form.imageBlob ? previousPath : undefined,
+    })
+
+    page.value = 'projects'
+    resetForm()
+  } catch (error) {
+    formError.value = error instanceof Error ? error.message : 'Não foi possível salvar o projeto.'
+  } finally {
+    saving.value = false
   }
-  page.value = 'projects'
-  resetForm()
+}
+
+async function onToggle(id: string): Promise<void> {
+  try {
+    await toggleAdminProject(id)
+  } catch (error) {
+    projectsError.value = error instanceof Error ? error.message : 'Falha ao alterar o status.'
+  }
+}
+
+async function onRemove(project: AdminProject): Promise<void> {
+  if (!confirm(`Excluir "${project.title}"? Esta ação não pode ser desfeita.`)) return
+  try {
+    await removeAdminProject(project.id)
+  } catch (error) {
+    projectsError.value = error instanceof Error ? error.message : 'Falha ao excluir o projeto.'
+  }
 }
 </script>
 
 <template>
-  <main v-if="!isAuthenticated" class="admin-login grid min-h-screen place-items-center bg-ink-950 px-5">
+  <main v-if="!authReady" class="grid min-h-screen place-items-center bg-ink-950 text-muted">
+    <p class="label-caps">Carregando…</p>
+  </main>
+
+  <main v-else-if="!isAuthenticated" class="admin-login grid min-h-screen place-items-center bg-ink-950 px-5">
     <section class="w-full max-w-md border border-gold-500/35 bg-ink-900 p-8 shadow-luxe sm:p-10">
       <div class="mx-auto grid size-14 place-items-center border border-gold-400/50 font-display text-2xl text-gold-300">E</div>
       <p class="label-caps mt-6 text-center text-gold-400">Área exclusiva</p>
@@ -168,7 +263,7 @@ function submitProject(): void {
           <input v-model="credentials.password" required type="password" autocomplete="current-password" class="mt-2 w-full border border-gold-500/30 bg-ink-950 px-4 py-3 text-ivory focus:border-gold-400" placeholder="••••••••" />
         </label>
         <p v-if="loginError" class="text-sm text-red-400" role="alert">{{ loginError }}</p>
-        <button class="label-caps w-full border border-gold-400 bg-gold-400 px-5 py-3 text-ink-950 transition hover:bg-gold-200">Entrar no painel</button>
+        <button :disabled="loginLoading" class="label-caps w-full border border-gold-400 bg-gold-400 px-5 py-3 text-ink-950 transition hover:bg-gold-200 disabled:opacity-60">{{ loginLoading ? 'Entrando…' : 'Entrar no painel' }}</button>
       </form>
       <a href="/" class="label-caps mt-6 block text-center text-muted hover:text-gold-300">Voltar ao site</a>
     </section>
@@ -200,6 +295,8 @@ function submitProject(): void {
     </header>
 
     <main class="px-5 py-8 md:ml-64 md:px-8 lg:px-12">
+      <p v-if="projectsError" class="mb-6 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">{{ projectsError }}</p>
+      <p v-if="projectsLoading" class="mb-6 text-sm text-muted">Carregando projetos…</p>
       <template v-if="page === 'dashboard'">
         <div class="flex items-start justify-between gap-6">
           <div><p class="label-caps text-gold-400">Visão geral</p><h1 class="mt-2 text-4xl sm:text-5xl">Dashboard</h1></div>
@@ -236,7 +333,7 @@ function submitProject(): void {
         <section v-if="filteredProjects.length" class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           <article v-for="project in filteredProjects" :key="project.id" class="overflow-hidden border border-gold-500/25 bg-ink-900">
             <img :src="project.src" :alt="project.alt" class="aspect-[16/9] w-full object-cover" />
-            <div class="p-5"><div class="flex items-start justify-between gap-3"><h2 class="text-2xl">{{ project.title }}</h2><span class="text-xs" :class="project.active ? 'text-green-400' : 'text-muted'">{{ project.active ? '● Ativo' : '○ Rascunho' }}</span></div><p class="label-caps mt-2 text-gold-400">{{ project.category }}</p><p class="mt-3 line-clamp-2 text-sm text-muted">{{ project.description }}</p><div class="mt-5 flex gap-4 border-t border-gold-500/15 pt-4"><button class="text-sm text-gold-300" @click="openEditor(project)">Editar</button><button class="text-sm text-sand" @click="toggleAdminProject(project.id)">{{ project.active ? 'Desativar' : 'Ativar' }}</button><button class="ml-auto text-sm text-red-400" @click="removeAdminProject(project.id)">Excluir</button></div></div>
+            <div class="p-5"><div class="flex items-start justify-between gap-3"><h2 class="text-2xl">{{ project.title }}</h2><span class="text-xs" :class="project.active ? 'text-green-400' : 'text-muted'">{{ project.active ? '● Ativo' : '○ Rascunho' }}</span></div><p class="label-caps mt-2 text-gold-400">{{ project.category }}</p><p class="mt-3 line-clamp-2 text-sm text-muted">{{ project.description }}</p><div class="mt-5 flex gap-4 border-t border-gold-500/15 pt-4"><button class="text-sm text-gold-300" @click="openEditor(project)">Editar</button><button class="text-sm text-sand" @click="onToggle(project.id)">{{ project.active ? 'Desativar' : 'Ativar' }}</button><button class="ml-auto text-sm text-red-400" @click="onRemove(project)">Excluir</button></div></div>
           </article>
         </section>
         <div v-else class="mt-8 border border-dashed border-gold-500/25 py-20 text-center text-muted">Nenhum projeto encontrado.</div>
@@ -246,11 +343,11 @@ function submitProject(): void {
         <button class="label-caps text-gold-400" @click="page = 'projects'">← Voltar</button>
         <h1 class="mt-4 text-4xl sm:text-5xl">{{ editingId ? 'Editar projeto' : 'Novo projeto' }}</h1>
         <form class="mt-10 max-w-4xl space-y-8" @submit.prevent="submitProject">
-          <section class="admin-panel"><h2 class="text-2xl">Imagem do projeto</h2><label class="mt-5 grid min-h-64 cursor-pointer place-items-center overflow-hidden border border-dashed border-gold-400/40 bg-ink-950 text-center"><img v-if="form.image" :src="form.image" alt="Prévia" class="max-h-96 w-full object-contain" /><span v-else><strong class="block text-gold-300">Selecionar imagem</strong><small class="mt-2 block text-muted">JPG, PNG ou WebP · máximo 15 MB</small><small class="mt-1 block text-muted">A imagem será otimizada automaticamente.</small></span><input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="onImage" /></label></section>
+          <section class="admin-panel"><h2 class="text-2xl">Imagem do projeto</h2><label class="mt-5 grid min-h-64 cursor-pointer place-items-center overflow-hidden border border-dashed border-gold-400/40 bg-ink-950 text-center"><img v-if="form.imagePreview" :src="form.imagePreview" alt="Prévia" class="max-h-96 w-full object-contain" /><span v-else><strong class="block text-gold-300">Selecionar imagem</strong><small class="mt-2 block text-muted">JPG, PNG ou WebP · máximo 15 MB</small><small class="mt-1 block text-muted">A imagem será otimizada automaticamente.</small></span><input type="file" accept="image/jpeg,image/png,image/webp" class="sr-only" @change="onImage" /></label></section>
           <section class="admin-panel"><h2 class="text-2xl">Informações básicas</h2><div class="mt-6 grid gap-5 sm:grid-cols-2"><label class="sm:col-span-2"><span class="admin-label">Título</span><input v-model="form.title" required class="admin-input mt-2" /></label><label class="sm:col-span-2"><span class="admin-label">Descrição</span><textarea v-model="form.description" required rows="5" class="admin-input mt-2 resize-y" /></label><label><span class="admin-label">Categoria</span><input v-model="form.category" required class="admin-input mt-2" /></label><label><span class="admin-label">Ano</span><input v-model="form.year" required type="number" class="admin-input mt-2" /></label><label class="sm:col-span-2"><span class="admin-label">Link do projeto</span><input v-model="form.href" type="url" class="admin-input mt-2" placeholder="https://" /></label></div></section>
           <section class="admin-panel flex items-center justify-between gap-6"><div><h2 class="text-2xl">Projeto ativo</h2><p class="mt-1 text-sm text-muted">Projetos ativos aparecem no portfólio público.</p></div><button type="button" role="switch" :aria-checked="form.active" class="h-7 w-12 rounded-full p-1 transition" :class="form.active ? 'bg-gold-400' : 'bg-ink-700'" @click="form.active = !form.active"><span class="block size-5 rounded-full bg-white transition" :class="form.active ? 'translate-x-5' : ''" /></button></section>
           <p v-if="formError" class="border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">{{ formError }}</p>
-          <div class="flex justify-end gap-4"><button type="button" class="admin-secondary" @click="page = 'projects'">Cancelar</button><button class="admin-primary">{{ editingId ? 'Salvar alterações' : 'Criar projeto' }}</button></div>
+          <div class="flex justify-end gap-4"><button type="button" class="admin-secondary" @click="page = 'projects'">Cancelar</button><button :disabled="saving" class="admin-primary disabled:opacity-60">{{ saving ? 'Salvando…' : editingId ? 'Salvar alterações' : 'Criar projeto' }}</button></div>
         </form>
       </template>
     </main>

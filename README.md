@@ -36,6 +36,33 @@ npm run assets       # regenera src/assets/** e public/** a partir da arte origi
 - `socialLinks` de Instagram e LinkedIn estão com `href: ''`. Enquanto vazios,
   o ícone não é renderizado — assim o rodapé nunca publica um link quebrado.
 
+## Supabase
+
+O portfólio pode ser gerenciado pelo painel em `/admin`, com os dados no Supabase.
+
+**Configuração (uma vez):**
+
+1. Copie `.env.example` para `.env.local` e preencha `VITE_SUPABASE_URL` e
+   `VITE_SUPABASE_PUBLISHABLE_KEY` (Settings → Data API).
+2. Rode [`supabase/schema.sql`](supabase/schema.sql) no SQL Editor. Ele cria a
+   tabela `projects`, o bucket `portfolio` e as políticas de RLS.
+3. Crie o usuário administrador em Authentication → Users → Add user.
+
+> **A secret key (`sb_secret_…`) nunca entra neste projeto.** Ela ignora as
+> políticas de RLS, e qualquer variável `VITE_*` é compilada dentro do bundle
+> público. Só a publishable key é usada aqui.
+
+**Como o acesso funciona:** a RLS decide tudo. Visitante anônimo lê apenas
+projetos com `active = true`; criar, editar e apagar exige sessão autenticada.
+A publishable key sozinha não escreve nada.
+
+**Divisão de bundle:** a home lê os projetos com um `fetch` simples na API REST
+(~0 kB extra). O SDK do Supabase e o painel inteiro ficam num chunk separado,
+baixado só quem abre `/admin`.
+
+**Sem Supabase configurado** o site funciona normalmente com o portfólio
+estático de `src/data/portfolio.ts` — o mesmo vale se a API estiver fora do ar.
+
 ## Formulário de contato
 
 Sem configuração, o envio abre o cliente de e-mail do visitante com a

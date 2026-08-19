@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
 import { primaryNav } from '@/data/navigation'
 import { useActiveSection } from '@/composables/useActiveSection'
 import { useScrollReveal } from '@/composables/useScrollReveal'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import HomeView from '@/views/HomeView.vue'
-import AdminView from '@/views/AdminView.vue'
+
+// O painel (e o SDK do Supabase junto) só é baixado ao acessar /admin.
+const AdminView = defineAsyncComponent(() => import('@/views/AdminView.vue'))
 
 const activeId = useActiveSection(primaryNav.map((item) => item.id))
 const isAdmin = window.location.pathname.replace(/\/$/, '') === '/admin'
