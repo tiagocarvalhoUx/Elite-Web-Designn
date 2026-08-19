@@ -85,6 +85,20 @@ onBeforeUnmount(() => {
   if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl)
 })
 
+/**
+ * Cada falha de login tem uma saída diferente — dizer sempre "senha incorreta"
+ * faria alguém repetir a senha certa indefinidamente por causa de um e-mail
+ * não confirmado.
+ */
+function loginMessage(code: string | undefined, status: number | undefined): string {
+  if (code === 'email_not_confirmed')
+    return 'Este usuário existe, mas o e-mail não foi confirmado. No Supabase, marque "Auto Confirm User" ao criá-lo.'
+  if (code === 'over_request_rate_limit' || status === 429)
+    return 'Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.'
+  if (status === undefined) return 'Sem conexão com o servidor. Verifique sua internet.'
+  return 'E-mail ou senha incorretos.'
+}
+
 async function login(): Promise<void> {
   if (!supabase) {
     loginError.value = 'Supabase não configurado. Defina as variáveis em .env.local.'
@@ -100,7 +114,7 @@ async function login(): Promise<void> {
 
   loginLoading.value = false
   if (error) {
-    loginError.value = 'E-mail ou senha incorretos.'
+    loginError.value = loginMessage(error.code, error.status)
     return
   }
   credentials.password = ''
