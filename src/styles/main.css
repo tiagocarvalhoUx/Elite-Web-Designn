@@ -141,6 +141,69 @@
   letter-spacing: 0.02em;
 }
 
+/* ==========================================================================
+   Filete de luz correndo pela borda.
+
+   `@property` torna o ângulo animável — sem ele o navegador não interpola um
+   conic-gradient. A máscara em duas camadas (content-box menos a caixa cheia)
+   deixa visível só a moldura, então o brilho corre pela borda e não invade o
+   miolo do elemento.
+   ========================================================================== */
+@property --trace-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes gold-trace-run {
+  to {
+    --trace-angle: 360deg;
+  }
+}
+
+@utility gold-trace {
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+
+    /* Arco curto e quente: é um reflexo passando, não um contorno aceso. */
+    background: conic-gradient(
+      from var(--trace-angle),
+      transparent 0deg 205deg,
+      rgba(214, 172, 82, 0.3) 252deg,
+      rgba(255, 246, 224, 0.92) 286deg,
+      rgba(214, 172, 82, 0.3) 320deg,
+      transparent 352deg 360deg
+    );
+
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    animation: gold-trace-run var(--trace-duration, 6s) linear infinite;
+    animation-delay: var(--trace-delay, 0s);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+      opacity: 0;
+    }
+  }
+}
+
 @utility text-gold-gradient {
   background: linear-gradient(135deg, #76531a 0%, #c79635 38%, #e6c67d 54%, #a97827 100%);
   -webkit-background-clip: text;

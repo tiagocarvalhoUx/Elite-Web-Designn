@@ -49,6 +49,9 @@ const SIZES: Record<Size, string> = {
     :class="[
       VARIANTS[variant],
       variant === 'underline' ? 'min-h-11 text-[0.72rem]' : SIZES[size],
+      // `underline` é só um filete embaixo: traçar a volta inteira inventaria
+      // uma moldura que o botão não tem.
+      variant !== 'underline' && 'gold-trace',
       inactive && 'pointer-events-none opacity-55',
     ]"
   >

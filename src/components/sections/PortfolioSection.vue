@@ -31,7 +31,11 @@ onMounted(() => {
           v-for="(project, index) in visibleProjects"
           :key="project.id"
           data-reveal
-          :style="{ '--reveal-delay': `${(index % 3) * 90}ms` }"
+          :style="{
+            '--reveal-delay': `${(index % 3) * 90}ms`,
+            '--trace-delay': `${index * -1.1}s`,
+            '--trace-duration': `${6.5 + (index % 3) * 0.6}s`,
+          }"
         >
           <ProjectCard :project="project" @open="selected = project" />
         </li>

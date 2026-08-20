@@ -9,7 +9,7 @@ const emit = defineEmits<{ open: [] }>()
   <article class="group flex flex-col">
     <button
       type="button"
-      class="relative block w-full cursor-pointer overflow-hidden border border-gold-500/50 bg-ink-800 transition-[border-color,box-shadow] duration-300 ease-luxe hover:border-gold-400/70 hover:shadow-lift focus-visible:border-gold-400"
+      class="gold-trace relative block w-full cursor-pointer overflow-hidden border border-gold-500/50 bg-ink-800 transition-[border-color,box-shadow] duration-300 ease-luxe hover:border-gold-400/70 hover:shadow-lift focus-visible:border-gold-400"
       :style="{ aspectRatio: PROJECT_ASPECT }"
       :aria-label="`Ver apresentação do projeto ${project.title}`"
       aria-haspopup="dialog"
