@@ -4,6 +4,7 @@ import type { PortfolioProject } from '@/data/portfolio'
 import { useFocusTrap } from '@/composables/useFocusTrap'
 import { useScrollLock } from '@/composables/useScrollLock'
 import AppIcon from './AppIcon.vue'
+import DeviceFrame from './DeviceFrame.vue'
 
 const props = defineProps<{ project: PortfolioProject | null }>()
 const emit = defineEmits<{ close: [] }>()
@@ -54,48 +55,63 @@ function onKeydown(event: KeyboardEvent): void {
 
         <div class="case-rule mt-8 sm:mt-9" />
 
-        <section class="mockup-stage mt-14 sm:mt-20" aria-label="Demonstração responsiva e interativa do projeto">
-          <div class="devices-grid">
+        <section
+          class="mockup-stage mt-14 sm:mt-20"
+          aria-label="Demonstração responsiva e interativa do projeto"
+        >
+          <!-- Com link ao vivo: o site roda de verdade dentro das molduras. -->
+          <div v-if="project.href" class="devices-grid">
             <div class="desktop-column">
-              <div class="imac-shell">
-                <span class="imac-camera" aria-hidden="true" />
-                <div class="imac-screen">
-                  <iframe
-                    v-if="project.href"
-                    :src="project.href"
-                    :title="`${project.title} — versão desktop interativa`"
-                    loading="eager"
-                    allow="fullscreen; autoplay; clipboard-read; clipboard-write"
-                  />
-                  <img v-else :src="project.full" :alt="project.alt" class="fallback-preview" />
-                </div>
-                <div class="imac-chin"><span /></div>
-              </div>
-              <div class="imac-stand" aria-hidden="true"><span /></div>
-              <p class="device-hint"><span aria-hidden="true">▣</span> Passe o cursor para navegar e rolar o projeto no desktop.</p>
+              <DeviceFrame
+                kind="desktop"
+                :src="project.href"
+                :title="`${project.title} — versão desktop`"
+              />
+              <p class="device-hint">
+                Site real em 1440 px, reduzido para caber na tela. Role e clique dentro do monitor.
+              </p>
             </div>
 
             <div class="phone-column">
-              <div class="phone-shell">
-                <span class="phone-speaker" aria-hidden="true" />
-                <div class="phone-screen">
-                  <iframe
-                    v-if="project.href"
-                    :src="project.href"
-                    :title="`${project.title} — versão mobile interativa`"
-                    loading="eager"
-                    allow="fullscreen; autoplay; clipboard-read; clipboard-write"
-                  />
-                  <img v-else :src="project.full" :alt="`${project.alt} Versão mobile.`" class="fallback-preview object-center" />
-                </div>
-              </div>
-              <p class="device-hint"><span aria-hidden="true">▯</span> Toque e role para explorar a versão responsiva.</p>
+              <DeviceFrame
+                kind="phone"
+                :src="project.href"
+                :title="`${project.title} — versão mobile`"
+              />
+              <p class="device-hint">
+                Mesmo site em 390 px — o layout que o visitante vê no celular.
+              </p>
             </div>
           </div>
+
+          <!--
+            Sem link: a arte do projeto já é uma composição com dispositivo.
+            Emoldurá-la de novo criaria um notebook dentro de um monitor, então
+            ela é apresentada inteira, sem recorte.
+          -->
+          <figure v-else class="still-stage">
+            <img
+              :src="project.full"
+              :alt="project.alt"
+              class="still-stage__image"
+              decoding="async"
+            />
+            <figcaption class="device-hint">
+              Registro do projeto entregue. Cadastre o endereço no painel para exibir a versão
+              navegável.
+            </figcaption>
+          </figure>
         </section>
 
         <footer class="mt-16 flex flex-col gap-7 border-t border-gold-500/20 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p class="label-caps text-muted">{{ project.category }} <span class="px-2 text-gold-400">•</span> Desktop <span class="px-2 text-gold-400">•</span> Celular</p>
+          <p class="label-caps text-muted">
+            {{ project.category }}
+            <span class="px-2 text-gold-400">•</span>{{ project.year }}
+            <template v-if="project.href">
+              <span class="px-2 text-gold-400">•</span>Desktop
+              <span class="px-2 text-gold-400">•</span>Celular
+            </template>
+          </p>
           <div class="flex items-center gap-6">
             <a
               v-if="project.href"
@@ -138,91 +154,16 @@ function onKeydown(event: KeyboardEvent): void {
 
 .desktop-column, .phone-column { min-width: 0; }
 
-.imac-shell {
-  position: relative;
-  padding: clamp(1.1rem, 2.1vw, 2.2rem) clamp(1.1rem, 2vw, 2rem) 0;
-  overflow: hidden;
-  border: 1px solid rgb(230 198 125 / .72);
-  border-bottom: 0;
-  border-radius: clamp(1rem, 2vw, 2rem) clamp(1rem, 2vw, 2rem) 0 0;
-  background: linear-gradient(145deg, #151517, #080809);
-  box-shadow: inset 0 0 0 1px rgb(201 155 59 / .1), 0 35px 80px rgb(0 0 0 / .7), 0 0 50px rgb(201 155 59 / .07);
+.still-stage {
+  margin: 0;
 }
 
-.imac-camera {
-  position: absolute;
-  top: .55rem;
-  left: 50%;
-  width: .45rem;
-  height: .45rem;
-  transform: translateX(-50%);
-  border: 1px solid #333;
-  border-radius: 50%;
-  background: #030303;
-}
-
-.imac-screen {
-  height: clamp(360px, 53vw, 790px);
-  overflow: hidden;
-  border: 1px solid rgb(230 198 125 / .48);
-  background: #050504;
-}
-
-.imac-screen iframe, .phone-screen iframe { width: 100%; height: 100%; border: 0; background: white; }
-.fallback-preview { width: 100%; height: 100%; object-fit: cover; }
-
-.imac-chin {
-  position: relative;
-  height: clamp(4rem, 7vw, 7rem);
-  margin-inline: clamp(-2rem, -2vw, -1.1rem);
-  background: linear-gradient(180deg, #f2f2f1, #d8d8d7);
-}
-
-.imac-chin span {
-  position: absolute;
-  top: 50%; left: 50%;
-  width: .8rem; height: .8rem;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: #050505;
-}
-
-.imac-stand {
-  width: 42%;
-  height: clamp(5rem, 11vw, 10rem);
+.still-stage__image {
+  width: 100%;
+  max-width: 1200px;
   margin-inline: auto;
-  background: linear-gradient(90deg, #cfcfce, #f4f4f3 48%, #bdbdbc);
-  clip-path: polygon(35% 0, 65% 0, 70% 84%, 91% 94%, 94% 100%, 6% 100%, 9% 94%, 30% 84%);
-  filter: drop-shadow(0 16px 16px rgb(0 0 0 / .6));
-}
-
-.phone-shell {
-  position: relative;
-  padding: clamp(.55rem, 1vw, .9rem);
-  border: clamp(.45rem, .8vw, .75rem) solid #1d1d22;
-  outline: 1px solid rgb(230 198 125 / .72);
-  outline-offset: 1px;
-  border-radius: clamp(2.2rem, 4vw, 4rem);
-  background: #09090a;
-  box-shadow: inset 0 0 0 1px rgb(201 155 59 / .2), 0 35px 80px rgb(0 0 0 / .8), 0 0 45px rgb(201 155 59 / .08);
-}
-
-.phone-speaker {
-  position: absolute;
-  top: .65rem; left: 50%; z-index: 2;
-  width: 36%; height: .65rem;
-  transform: translateX(-50%);
-  border: 1px solid #29292d;
-  border-radius: 999px;
-  background: #070708;
-}
-
-.phone-screen {
-  height: clamp(440px, 49vw, 735px);
-  overflow: hidden;
-  border: 1px solid rgb(230 198 125 / .4);
-  border-radius: clamp(1.45rem, 2.7vw, 2.8rem);
-  background: #050504;
+  border: 1px solid rgb(201 155 59 / .28);
+  box-shadow: 0 34px 70px rgb(0 0 0 / .6);
 }
 
 .device-hint {
@@ -243,8 +184,6 @@ function onKeydown(event: KeyboardEvent): void {
 
 @media (max-width: 800px) {
   .devices-grid { grid-template-columns: 1fr; align-items: start; }
-  .phone-column { width: min(72%, 330px); margin-inline: auto; }
-  .imac-screen { height: clamp(260px, 59vw, 430px); }
-  .phone-screen { height: 610px; }
+  .phone-column { width: min(68%, 320px); margin-inline: auto; }
 }
 </style>
