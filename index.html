@@ -33,8 +33,85 @@
     <meta name="twitter:image" content="https://elitewebdesigner.com.br/og-image.jpg" />
 
     <link rel="icon" href="/icon-32.png" sizes="32x32" />
+    <link rel="icon" href="/icon-192.png" sizes="192x192" />
     <link rel="icon" href="/icon-512.png" sizes="512x512" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- Define o fundo do splash do Android; sem manifest ele monta a tela em branco. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!--
+      Abertura inline: precisa pintar na primeira resposta, antes do CSS e do JS
+      do bundle. Sendo o site renderizado no cliente, sem isto a tela fica branca
+      até o app montar — num layout preto e dourado, um corte seco.
+    -->
+    <style>
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #070706;
+        transition:
+          opacity 0.75s cubic-bezier(0.22, 0.61, 0.36, 1),
+          visibility 0.75s;
+      }
+      #splash.is-done {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .splash__mark {
+        width: clamp(84px, 21vw, 128px);
+        height: auto;
+        opacity: 0;
+        transform: translateY(12px) scale(0.94);
+        animation: splash-mark 1s cubic-bezier(0.22, 0.61, 0.36, 1) 0.08s forwards;
+      }
+      /* Mesma luz diagonal do hero, atravessando a cena uma única vez. */
+      .splash__sheen {
+        position: absolute;
+        top: -60%;
+        left: -30%;
+        width: 26%;
+        height: 220%;
+        transform: rotate(-27deg) translateX(-60vw);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(214, 172, 82, 0.16) 42%,
+          rgba(255, 246, 224, 0.5) 50%,
+          rgba(214, 172, 82, 0.16) 58%,
+          transparent
+        );
+        filter: blur(22px);
+        animation: splash-sheen 1.9s cubic-bezier(0.4, 0, 0.2, 1) 0.25s forwards;
+      }
+      @keyframes splash-mark {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      @keyframes splash-sheen {
+        to {
+          transform: rotate(-27deg) translateX(140vw);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .splash__mark,
+        .splash__sheen {
+          animation: none;
+        }
+        .splash__mark {
+          opacity: 1;
+          transform: none;
+        }
+        .splash__sheen {
+          display: none;
+        }
+      }
+    </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -75,6 +152,44 @@
     </script>
   </head>
   <body>
+    <div id="splash" role="status" aria-label="Carregando Elite Web Designer">
+      <span class="splash__sheen" aria-hidden="true"></span>
+      <img
+        class="splash__mark"
+        src="/brand-mark.webp"
+        width="260"
+        height="174"
+        alt=""
+        fetchpriority="high"
+      />
+    </div>
+
+    <script>
+      // A abertura nunca pode reter a página: some quando o app avisa que montou
+      // e, de qualquer forma, no limite de tempo abaixo.
+      ;(function () {
+        var MIN_MS = 900
+        var MAX_MS = 4000
+        var start = Date.now()
+        var splash = document.getElementById('splash')
+        var gone = false
+
+        function remove() {
+          if (gone || !splash) return
+          gone = true
+          splash.classList.add('is-done')
+          setTimeout(function () {
+            splash.remove()
+          }, 800)
+        }
+
+        window.__hideSplash = function () {
+          setTimeout(remove, Math.max(0, MIN_MS - (Date.now() - start)))
+        }
+        setTimeout(remove, MAX_MS)
+      })()
+    </script>
+
     <div id="app"></div>
     <noscript>
       <p style="padding: 2rem; text-align: center">

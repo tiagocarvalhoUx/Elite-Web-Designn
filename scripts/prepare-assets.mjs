@@ -75,23 +75,6 @@ async function brand() {
   console.log('brand: logo + lockup')
 }
 
-async function metaImages() {
-  await mkdir(PUBLIC, { recursive: true })
-  const mark = path.join(PACK, '01_BRAND', 'logo-wd-gold-on-dark.png')
-  for (const size of [32, 180, 512]) {
-    await sharp(mark)
-      .resize({ width: size, height: size, fit: 'contain', background: '#070706', kernel: 'lanczos3' })
-      .png()
-      .toFile(path.join(PUBLIC, size === 180 ? 'apple-touch-icon.png' : `icon-${size}.png`))
-  }
-  await sharp(path.join(SHOTS, 'projeto_mrv_luxo.png'))
-    .extract({ left: 0, top: 130, width: 2176, height: 1142 })
-    .resize({ width: 1200, height: 630, fit: 'cover', position: 'centre' })
-    .jpeg({ quality: 82, mozjpeg: true })
-    .toFile(path.join(PUBLIC, 'og-image.jpg'))
-  console.log('meta: icons + og-image')
-}
-
 /**
  * Textura de mármore preto com veios dourados, recortada de uma área limpa
  * da arte original (sem device, sem marca d'água, sem título).
@@ -109,6 +92,57 @@ async function marble() {
       .toFile(path.join(OUT, 'decorative', `marble-${w}.webp`))
   }
   console.log('decorative: marble')
+}
+
+async function metaImages() {
+  await mkdir(PUBLIC, { recursive: true })
+  const mark = path.join(PACK, '01_BRAND', 'logo-wd-gold-transparent.png')
+
+  /**
+   * Monograma recortado do fundo transparente e centralizado num quadrado de
+   * tinta. O `contain` sobre a arte original deixava a régua dourada solta no
+   * rodapé do ícone e barras pretas nas laterais.
+   */
+  const trimmed = await sharp(mark).trim().png().toBuffer()
+
+  for (const size of [192, 512]) {
+    const inner = Math.round(size * 0.62)
+    const glyph = await sharp(trimmed)
+      .resize({ width: inner, fit: 'inside', kernel: 'lanczos3' })
+      .png()
+      .toBuffer()
+
+    await sharp({
+      create: { width: size, height: size, channels: 4, background: '#070706' },
+    })
+      .composite([{ input: glyph, gravity: 'centre' }])
+      .png()
+      .toFile(path.join(PUBLIC, `icon-${size}.png`))
+  }
+
+  // Favicon e ícone de toque seguem a mesma construção.
+  await sharp(path.join(PUBLIC, 'icon-192.png'))
+    .resize(32, 32, { kernel: 'lanczos3' })
+    .png()
+    .toFile(path.join(PUBLIC, 'icon-32.png'))
+  await sharp(path.join(PUBLIC, 'icon-512.png'))
+    .resize(180, 180, { kernel: 'lanczos3' })
+    .png()
+    .toFile(path.join(PUBLIC, 'apple-touch-icon.png'))
+
+  // Marca usada pela abertura inline do index.html: caminho fixo, sem hash,
+  // para poder ser referenciada antes do bundle existir.
+  await sharp(trimmed)
+    .resize({ width: 260, kernel: 'lanczos3' })
+    .webp({ quality: 92, effort: 6 })
+    .toFile(path.join(PUBLIC, 'brand-mark.webp'))
+
+  await sharp(path.join(SHOTS, 'projeto_mrv_luxo.png'))
+    .extract({ left: 0, top: 130, width: 2176, height: 1142 })
+    .resize({ width: 1200, height: 630, fit: 'cover', position: 'centre' })
+    .jpeg({ quality: 82, mozjpeg: true })
+    .toFile(path.join(PUBLIC, 'og-image.jpg'))
+  console.log('meta: icons + brand-mark + og-image')
 }
 
 await portfolio()
