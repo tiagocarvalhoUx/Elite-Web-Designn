@@ -11,8 +11,9 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
   <section id="inicio" class="hero relative overflow-hidden border-b border-gold-500/25">
     <!-- Feixe de luz cinematográfico, sobreposto à textura de mármore. -->
     <div class="hero__light" aria-hidden="true">
+      <span class="hero__grain" />
       <span class="hero__wash" />
-      <span class="hero__beam hero__beam--ghost" />
+      <span class="hero__scatter" />
       <span class="hero__beam" />
     </div>
     <div class="hero__vignette" aria-hidden="true" />
@@ -106,21 +107,17 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
       linear-gradient(180deg, rgba(5, 5, 4, 0.86) 0%, rgba(5, 5, 4, 0.8) 42%, rgba(5, 5, 4, 0.97) 100%),
       url('@/assets/decorative/marble-640.webp');
   }
+
+  /* Reaproveita a textura leve já baixada, em vez de puxar a de 1200 px. */
+  .hero__grain {
+    background-image: url('@/assets/decorative/marble-640.webp');
+  }
 }
 
 /*
- * Raio de luz diagonal.
- *
- * Duas camadas com desfoques diferentes: o elemento carrega o halo largo e
- * difuso, o ::before carrega o núcleo fino e quente. Um desfoque único no
- * mesmo elemento apagaria o núcleo junto com o halo — é isso que diferencia
- * um raio de um borrão.
- */
-/*
- * Geometria medida na arte original (00_REFERENCE/homepage-complete.png):
- * o núcleo entra a ~7% da largura no topo do hero e chega a ~27% na metade
- * da altura — 33° em relação à vertical. O giro é negativo porque, em CSS,
- * o positivo joga a base para a esquerda.
+ * Conjunto de luz do hero, medido em 00_REFERENCE/homepage-complete.png:
+ * um único feixe a 27° da vertical, nascendo abaixo do header. O giro é
+ * negativo porque, em CSS, o positivo joga a base para a esquerda.
  */
 .hero__light {
   position: absolute;
@@ -130,9 +127,27 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
 }
 
 /*
- * Banho ambiente: a luz não só atravessa a cena, ela acende o mármore do canto
- * superior esquerdo. Sem isso o raio fica flutuando sobre um fundo morto.
+ * Os "detalhes em volta" da referência são os veios do mármore acendendo onde
+ * a luz bate — não um segundo raio. Uma segunda cópia da textura, em `screen`
+ * e mascarada ao redor do feixe, reacende o grão que o overlay escuro apagou.
  */
+.hero__grain {
+  position: absolute;
+  inset: 0;
+  background-image: url('@/assets/decorative/marble-1200.webp');
+  background-position: left top;
+  background-size: cover;
+  mix-blend-mode: screen;
+  opacity: 0.42;
+  mask-image: radial-gradient(
+    44% 40% at 15% 19%,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.45) 44%,
+    transparent 76%
+  );
+}
+
+/* Banho ambiente difuso, para o raio não flutuar sobre um fundo morto. */
 .hero__wash {
   position: absolute;
   top: -18%;
@@ -141,34 +156,61 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
   height: 78%;
   background: radial-gradient(
     50% 50% at 34% 22%,
-    rgba(226, 189, 105, 0.13) 0%,
-    rgba(170, 126, 49, 0.06) 42%,
+    rgba(226, 189, 105, 0.11) 0%,
+    rgba(170, 126, 49, 0.05) 42%,
     transparent 74%
   );
   filter: blur(46px);
 }
 
+/*
+ * Dispersão: a luz não corta o ar limpa, ela espalha. Mesmo eixo do feixe,
+ * muito mais larga e desfocada, alcançando quase o notebook como na arte.
+ */
+.hero__scatter {
+  position: absolute;
+  top: 0;
+  left: -14.9%;
+  width: 36%;
+  height: 100%;
+  transform: rotate(-27deg);
+  transform-origin: top center;
+  background: linear-gradient(
+    90deg,
+    transparent 6%,
+    rgba(170, 126, 49, 0.07) 30%,
+    rgba(226, 189, 105, 0.13) 50%,
+    rgba(170, 126, 49, 0.07) 70%,
+    transparent 94%
+  );
+  mask-image: linear-gradient(
+    180deg,
+    transparent 3%,
+    #000 17%,
+    rgba(0, 0, 0, 0.72) 44%,
+    rgba(0, 0, 0, 0.34) 66%,
+    transparent 88%
+  );
+  filter: blur(48px);
+}
+
+/*
+ * Um único feixe, medido na referência: 27° da vertical, núcleo entrando a
+ * ~6,6% da largura logo abaixo do header e alcançando quase o mockup.
+ */
 .hero__beam {
   position: absolute;
   top: 0;
-  left: -1.6%;
-  width: 18%;
+  left: -3.9%;
+  width: 14%;
   height: 100%;
-  transform: rotate(-33deg);
+  transform: rotate(-27deg);
   transform-origin: top center;
   /*
    * Sem `filter` aqui de propósito: um desfoque no pai também desfoca os
    * pseudo-elementos, e o núcleo fino desapareceria dentro do halo. Cada
    * camada carrega o seu.
    */
-}
-
-/* Segundo raio, mais fraco e aberto — a referência tem esse eco à esquerda. */
-.hero__beam--ghost {
-  left: -8%;
-  width: 26%;
-  transform: rotate(-30deg);
-  opacity: 0.5;
 }
 
 /* Halo largo e difuso. */
@@ -188,16 +230,21 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
     rgba(170, 126, 49, 0.12) 64%,
     transparent 82%
   );
-  /* Entra sob o header e morre antes da metade, como na referência. */
+  /*
+   * Totalmente apagado sob o header — na referência o cabeçalho é preto sólido
+   * e o raio só nasce abaixo da régua dourada.
+   */
   mask-image: linear-gradient(
     180deg,
     transparent 0%,
-    #000 9%,
-    rgba(0, 0, 0, 0.78) 32%,
-    rgba(0, 0, 0, 0.38) 52%,
-    transparent 70%
+    transparent 6.5%,
+    #000 12%,
+    rgba(0, 0, 0, 0.72) 32%,
+    rgba(0, 0, 0, 0.42) 52%,
+    rgba(0, 0, 0, 0.2) 68%,
+    transparent 84%
   );
-  filter: blur(22px);
+  filter: blur(20px);
 }
 
 /*
@@ -209,34 +256,37 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
   background: linear-gradient(
     90deg,
     transparent 47.2%,
-    rgba(214, 172, 82, 0.55) 48.9%,
-    rgba(255, 246, 224, 0.95) 50%,
-    rgba(214, 172, 82, 0.55) 51.1%,
+    rgba(214, 172, 82, 0.6) 48.7%,
+    rgba(255, 248, 230, 1) 50%,
+    rgba(214, 172, 82, 0.6) 51.3%,
     transparent 52.8%
   );
   mask-image:
     linear-gradient(
       180deg,
       transparent 0%,
-      #000 10%,
-      rgba(0, 0, 0, 0.8) 34%,
-      rgba(0, 0, 0, 0.34) 52%,
-      transparent 66%
+      transparent 6.5%,
+      #000 12%,
+      rgba(0, 0, 0, 0.84) 32%,
+      rgba(0, 0, 0, 0.46) 50%,
+      rgba(0, 0, 0, 0.2) 66%,
+      transparent 80%
     ),
     linear-gradient(
       180deg,
       rgba(0, 0, 0, 0.72) 0%,
-      #000 7%,
-      rgba(0, 0, 0, 0.58) 14%,
-      #000 22%,
-      rgba(0, 0, 0, 0.8) 29%,
-      #000 37%,
-      rgba(0, 0, 0, 0.5) 45%,
-      #000 54%,
-      rgba(0, 0, 0, 0.68) 62%
+      #000 9%,
+      rgba(0, 0, 0, 0.58) 15%,
+      #000 23%,
+      rgba(0, 0, 0, 0.8) 30%,
+      #000 38%,
+      rgba(0, 0, 0, 0.5) 46%,
+      #000 55%,
+      rgba(0, 0, 0, 0.62) 64%,
+      #000 72%
     );
   mask-composite: intersect;
-  filter: blur(1.8px);
+  filter: blur(1.7px);
 }
 
 .hero__vignette {
