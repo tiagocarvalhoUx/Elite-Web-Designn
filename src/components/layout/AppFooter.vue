@@ -42,19 +42,6 @@ const copyrightYear = computed(() =>
             </p>
           </div>
 
-          <ul v-if="socials.length" class="flex items-center gap-3">
-            <li v-for="social in socials" :key="social.id">
-              <a
-                :href="social.href"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex size-11 items-center justify-center border border-gold-500/30 text-gold-400 transition-colors duration-300 ease-luxe hover:border-gold-400 hover:bg-gold-400/10 hover:text-gold-200"
-              >
-                <AppIcon :name="social.id" :size="18" />
-                <span class="sr-only">{{ social.label }}</span>
-              </a>
-            </li>
-          </ul>
         </div>
 
         <!-- Contato vem logo após a marca no mobile; no desktop é a última coluna. -->
@@ -92,11 +79,16 @@ const copyrightYear = computed(() =>
           </ul>
         </div>
 
+        <!--
+          Navegação secundária só no desktop: no mobile são onze links que
+          repetem âncoras já cobertas pelo menu, alongando o rodapé sem
+          oferecer nenhum destino novo.
+        -->
         <nav
           v-for="(column, index) in footerColumns"
           :key="column.id"
           :aria-label="column.title"
-          class="order-3 flex flex-col gap-4"
+          class="order-3 hidden flex-col gap-4 lg:flex"
           :class="['lg:order-2', 'lg:order-3', 'lg:order-4'][index]"
         >
           <h2 class="label-caps text-gold-400/90">{{ column.title }}</h2>
@@ -114,8 +106,23 @@ const copyrightYear = computed(() =>
       </div>
     </div>
 
+    <!-- Faixa final: redes sociais logo acima da linha de direitos. -->
     <div class="border-t border-gold-500/15">
-      <div class="mx-auto max-w-(--shell) px-(--gutter) py-6">
+      <div class="mx-auto flex max-w-(--shell) flex-col items-center gap-5 px-(--gutter) py-7">
+        <ul v-if="socials.length" class="flex items-center gap-7">
+          <li v-for="social in socials" :key="social.id">
+            <a
+              :href="social.href"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex size-11 items-center justify-center text-gold-400 transition-colors duration-300 ease-luxe hover:text-gold-200"
+            >
+              <AppIcon :name="social.id" :size="24" />
+              <span class="sr-only">{{ social.label }}</span>
+            </a>
+          </li>
+        </ul>
+
         <p class="text-center text-xs text-muted">
           © {{ copyrightYear }} {{ site.name }}. Todos os direitos reservados.
         </p>

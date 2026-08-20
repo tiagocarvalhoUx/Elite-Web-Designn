@@ -20,6 +20,6 @@ withDefaults(defineProps<{ title: string; id?: string; as?: 'h2' | 'h3'; divider
     >
       {{ title }}
     </component>
-    <GoldDivider v-if="divider" :width="280" />
+    <GoldDivider v-if="divider" :width="280" :mobile-width="180" />
   </header>
 </template>

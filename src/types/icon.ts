@@ -2,7 +2,7 @@
 export type IconName =
   | 'whatsapp'
   | 'instagram'
-  | 'linkedin'
+  | 'facebook'
   | 'mail'
   | 'pin'
   | 'menu'

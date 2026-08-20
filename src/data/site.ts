@@ -30,8 +30,15 @@ export const site = {
 } as const
 
 export const socialLinks: readonly SocialLink[] = [
-  // TODO: preencher com os perfis reais para que apareçam no rodapé.
-  { id: 'instagram', label: 'Instagram', href: '' },
-  { id: 'linkedin', label: 'LinkedIn', href: '' },
+  {
+    id: 'instagram',
+    label: 'Instagram',
+    href: 'https://www.instagram.com/elite_webdesigner/',
+  },
+  {
+    id: 'facebook',
+    label: 'Facebook',
+    href: 'https://www.facebook.com/profile.php?id=61591613620551',
+  },
   { id: 'whatsapp', label: 'WhatsApp', href: site.whatsappUrl },
 ]

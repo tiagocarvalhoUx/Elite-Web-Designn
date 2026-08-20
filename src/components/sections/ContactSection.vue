@@ -14,10 +14,10 @@ const BASE =
   'w-full bg-transparent font-sans text-[1.05rem] text-ivory transition-colors duration-300 ease-luxe placeholder:text-muted/80 hover:border-gold-500/60 focus:border-gold-300 focus:outline-none aria-invalid:border-[#e0a04a] lg:text-[0.95rem] lg:placeholder:text-muted/70'
 
 /** Campo em filete, como na arte original. */
-const CONTROL = `${BASE} border-0 border-b border-gold-500/55 px-0 py-3.5 lg:border-gold-500/35 lg:py-3`
+const CONTROL = `${BASE} border-0 border-b border-gold-500/80 px-0 py-3.5 lg:border-gold-500/35 lg:py-3`
 
 /** Caixa fechada — só a mensagem, que precisa de área de escrita. */
-const BOX = `${BASE} min-h-36 resize-y border border-gold-500/55 px-4 py-3.5 leading-relaxed lg:border-gold-500/35 lg:py-3`
+const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 leading-relaxed lg:border-gold-500/35 lg:py-3`
 </script>
 
 <template>
