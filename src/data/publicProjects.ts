@@ -27,16 +27,23 @@ interface ProjectRow {
 
 export const remoteProjects = ref<PortfolioProject[]>([])
 
+/** Vira true quando a busca termina — com sucesso ou não. Separa "carregando"
+ *  de "não há projetos", que precisam de tratamentos visuais diferentes. */
+export const projectsLoaded = ref(false)
+
 function storageUrl(path: string): string {
   return `${URL_BASE}/storage/v1/object/public/${BUCKET}/${path}`
 }
 
 /**
- * Nunca lança: se o Supabase não estiver configurado, a tabela ainda não existir
- * ou a rede falhar, a seção segue exibindo o portfólio estático.
+ * Nunca lança: sem Supabase configurado, com a tabela ausente ou a rede fora,
+ * a seção cai no estado vazio em vez de quebrar a página.
  */
 export async function loadRemoteProjects(): Promise<void> {
-  if (!URL_BASE || !KEY) return
+  if (!URL_BASE || !KEY) {
+    projectsLoaded.value = true
+    return
+  }
 
   const query = new URLSearchParams({
     select: 'id,title,category,year,description,href,image_path',
@@ -67,6 +74,8 @@ export async function loadRemoteProjects(): Promise<void> {
       }
     })
   } catch {
-    // Silencioso por design: o portfólio estático é o fallback.
+    // Silencioso por design: a seção mostra o estado vazio em vez de quebrar.
+  } finally {
+    projectsLoaded.value = true
   }
 }
