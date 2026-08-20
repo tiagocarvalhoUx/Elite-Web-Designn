@@ -18,7 +18,7 @@ const copyrightYear = computed(() =>
   <footer class="relative border-t border-gold-500/25 bg-ink-950/70">
     <div class="mx-auto max-w-(--shell) px-(--gutter) py-16 lg:py-20">
       <div
-        class="grid gap-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_repeat(4,minmax(0,0.75fr))] lg:gap-10"
+        class="grid gap-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,0.95fr)_repeat(3,minmax(0,0.7fr))_minmax(0,1.05fr)] lg:gap-10"
       >
         <!-- O bloco de marca ocupa a linha inteira nos tablets, depois vira coluna. -->
         <div class="flex flex-col items-start gap-5 sm:col-span-2 lg:col-span-1">

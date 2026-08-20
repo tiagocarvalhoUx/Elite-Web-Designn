@@ -2,9 +2,10 @@
 import { defineAsyncComponent } from 'vue'
 import { primaryNav } from '@/data/navigation'
 import { useActiveSection } from '@/composables/useActiveSection'
-import { useScrollReveal } from '@/composables/useScrollReveal'
+import { useMotion } from '@/composables/useMotion'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
+import WhatsAppFab from '@/components/layout/WhatsAppFab.vue'
 import HomeView from '@/views/HomeView.vue'
 
 // O painel (e o SDK do Supabase junto) só é baixado ao acessar /admin.
@@ -13,7 +14,7 @@ const AdminView = defineAsyncComponent(() => import('@/views/AdminView.vue'))
 const activeId = useActiveSection(primaryNav.map((item) => item.id))
 const isAdmin = window.location.pathname.replace(/\/$/, '') === '/admin'
 
-useScrollReveal()
+useMotion()
 </script>
 
 <template>
@@ -33,5 +34,6 @@ useScrollReveal()
   </main>
 
   <AppFooter />
+  <WhatsAppFab />
   </template>
 </template>

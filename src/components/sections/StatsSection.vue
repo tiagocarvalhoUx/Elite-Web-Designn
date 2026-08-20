@@ -22,7 +22,7 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
         >
           <!-- Ordem visual (número acima do rótulo) sem quebrar a ordem dt → dd. -->
           <dt class="label-caps mt-3 max-w-[18ch] text-muted lg:max-w-none lg:whitespace-nowrap">{{ stat.label }}</dt>
-          <dd class="font-display text-[clamp(2.2rem,5vw,3.25rem)] leading-none text-gold-300">
+          <dd data-count class="font-display text-[clamp(2.2rem,5vw,3.25rem)] leading-none text-gold-300">
             {{ stat.value }}
           </dd>
         </div>

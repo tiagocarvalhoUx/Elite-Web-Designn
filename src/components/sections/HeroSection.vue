@@ -10,7 +10,11 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
 <template>
   <section id="inicio" class="hero relative overflow-hidden border-b border-gold-500/25">
     <!-- Feixe de luz cinematográfico, sobreposto à textura de mármore. -->
-    <div class="hero__beam" aria-hidden="true" />
+    <div class="hero__light" aria-hidden="true">
+      <span class="hero__wash" />
+      <span class="hero__beam hero__beam--ghost" />
+      <span class="hero__beam" />
+    </div>
     <div class="hero__vignette" aria-hidden="true" />
 
     <SiteContainer as="div" class="relative z-10 pt-32 pb-0 lg:pt-40">
@@ -104,23 +108,135 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
   }
 }
 
-/* Raio de luz que nasce no canto superior esquerdo, como na arte original. */
+/*
+ * Raio de luz diagonal.
+ *
+ * Duas camadas com desfoques diferentes: o elemento carrega o halo largo e
+ * difuso, o ::before carrega o núcleo fino e quente. Um desfoque único no
+ * mesmo elemento apagaria o núcleo junto com o halo — é isso que diferencia
+ * um raio de um borrão.
+ */
+/*
+ * Geometria medida na arte original (00_REFERENCE/homepage-complete.png):
+ * o núcleo entra a ~7% da largura no topo do hero e chega a ~27% na metade
+ * da altura — 33° em relação à vertical. O giro é negativo porque, em CSS,
+ * o positivo joga a base para a esquerda.
+ */
+.hero__light {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/*
+ * Banho ambiente: a luz não só atravessa a cena, ela acende o mármore do canto
+ * superior esquerdo. Sem isso o raio fica flutuando sobre um fundo morto.
+ */
+.hero__wash {
+  position: absolute;
+  top: -18%;
+  left: -14%;
+  width: 62%;
+  height: 78%;
+  background: radial-gradient(
+    50% 50% at 34% 22%,
+    rgba(226, 189, 105, 0.13) 0%,
+    rgba(170, 126, 49, 0.06) 42%,
+    transparent 74%
+  );
+  filter: blur(46px);
+}
+
 .hero__beam {
   position: absolute;
-  top: -30%;
-  left: -10%;
-  width: 44%;
-  height: 130%;
-  transform: rotate(16deg);
-  /* Elipse alongada: dissolve nas quatro bordas, sem deixar o retângulo aparecer. */
-  background: radial-gradient(
-    42% 34% at 50% 26%,
-    rgba(243, 219, 166, 0.34) 0%,
-    rgba(214, 172, 82, 0.12) 45%,
-    rgba(201, 155, 59, 0) 76%
+  top: 0;
+  left: -1.6%;
+  width: 18%;
+  height: 100%;
+  transform: rotate(-33deg);
+  transform-origin: top center;
+  /*
+   * Sem `filter` aqui de propósito: um desfoque no pai também desfoca os
+   * pseudo-elementos, e o núcleo fino desapareceria dentro do halo. Cada
+   * camada carrega o seu.
+   */
+}
+
+/* Segundo raio, mais fraco e aberto — a referência tem esse eco à esquerda. */
+.hero__beam--ghost {
+  left: -8%;
+  width: 26%;
+  transform: rotate(-30deg);
+  opacity: 0.5;
+}
+
+/* Halo largo e difuso. */
+.hero__beam::before,
+.hero__beam::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.hero__beam::before {
+  background: linear-gradient(
+    90deg,
+    transparent 18%,
+    rgba(170, 126, 49, 0.12) 36%,
+    rgba(226, 189, 105, 0.24) 50%,
+    rgba(170, 126, 49, 0.12) 64%,
+    transparent 82%
   );
-  filter: blur(30px);
-  pointer-events: none;
+  /* Entra sob o header e morre antes da metade, como na referência. */
+  mask-image: linear-gradient(
+    180deg,
+    transparent 0%,
+    #000 9%,
+    rgba(0, 0, 0, 0.78) 32%,
+    rgba(0, 0, 0, 0.38) 52%,
+    transparent 70%
+  );
+  filter: blur(22px);
+}
+
+/*
+ * Núcleo quente por cima: fino e quase sem desfoque — é ele que faz o raio.
+ * A segunda máscara quebra o brilho em trechos desiguais: na arte original a
+ * luz pega o grão do mármore e nunca é uma linha uniforme.
+ */
+.hero__beam::after {
+  background: linear-gradient(
+    90deg,
+    transparent 47.2%,
+    rgba(214, 172, 82, 0.55) 48.9%,
+    rgba(255, 246, 224, 0.95) 50%,
+    rgba(214, 172, 82, 0.55) 51.1%,
+    transparent 52.8%
+  );
+  mask-image:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      #000 10%,
+      rgba(0, 0, 0, 0.8) 34%,
+      rgba(0, 0, 0, 0.34) 52%,
+      transparent 66%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.72) 0%,
+      #000 7%,
+      rgba(0, 0, 0, 0.58) 14%,
+      #000 22%,
+      rgba(0, 0, 0, 0.8) 29%,
+      #000 37%,
+      rgba(0, 0, 0, 0.5) 45%,
+      #000 54%,
+      rgba(0, 0, 0, 0.68) 62%
+    );
+  mask-composite: intersect;
+  filter: blur(1.8px);
 }
 
 .hero__vignette {

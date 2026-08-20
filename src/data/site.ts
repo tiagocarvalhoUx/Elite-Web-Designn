@@ -12,8 +12,8 @@ export interface SocialLink {
   readonly href: string
 }
 
-/** TODO: substituir pelo número real antes de publicar (formato internacional, só dígitos). */
-const WHATSAPP_E164 = '5518999999999'
+/** Formato internacional, só dígitos: 55 (Brasil) + 18 (DDD) + número. */
+const WHATSAPP_E164 = '5518981142927'
 
 export const WHATSAPP_MESSAGE =
   'Olá! Vim pelo site da Elite Web Designer e gostaria de solicitar uma proposta.'
@@ -24,8 +24,7 @@ export const site = {
   location: 'Araçatuba — SP, Brasil',
   locationShort: 'Araçatuba — Brasil',
   email: 'eliteprimestoreselite@gmail.com',
-  /** TODO: alinhar com WHATSAPP_E164 quando o número real for definido. */
-  phoneDisplay: '(18) 9 9999-9999',
+  phoneDisplay: '(18) 98114-2927',
   whatsappUrl: `https://wa.me/${WHATSAPP_E164}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`,
   foundedYear: 2024,
 } as const

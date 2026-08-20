@@ -159,7 +159,11 @@
 }
 
 /* ==========================================================================
-   Scroll reveal — o conteúdo permanece visível sem JS e sem movimento.
+   Revelação de conteúdo.
+
+   Duas camadas: o GSAP conduz a coreografia quando carrega (escrevendo estilos
+   inline, que vencem estas regras) e este CSS é a rede de segurança — sem JS,
+   com movimento reduzido ou se o chunk de animação falhar, tudo aparece.
    ========================================================================== */
 @layer components {
   [data-reveal] {
@@ -184,6 +188,7 @@
     html.js [data-reveal] {
       opacity: 1;
       transform: none;
+      transition: none;
     }
   }
 }

@@ -105,20 +105,28 @@ const frameStyle = computed(() => ({
   background: linear-gradient(160deg, #26262a 0%, #101013 42%, #17171b 100%);
 }
 
+/*
+ * Filete dourado: 1px de borda, um realce interno claríssimo para dar o brilho
+ * de metal escovado e um halo externo muito difuso. Sem neon.
+ */
 .device--desktop .device__body {
+  border: 1px solid rgb(214 176 96 / 0.55);
   border-radius: clamp(0.55rem, 1vw, 1.1rem);
   padding-bottom: calc(var(--bezel) * 1.15);
   box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.07),
-    0 34px 70px rgb(0 0 0 / 0.62);
+    inset 0 0 0 1px rgb(240 214 150 / 0.12),
+    0 34px 70px rgb(0 0 0 / 0.62),
+    0 0 42px rgb(201 155 59 / 0.1);
 }
 
 .device--phone .device__body {
+  border: 1px solid rgb(214 176 96 / 0.55);
   border-radius: clamp(2rem, 3.4vw, 3.1rem);
   padding: clamp(0.35rem, 0.7vw, 0.6rem);
   box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.09),
-    0 26px 56px rgb(0 0 0 / 0.68);
+    inset 0 0 0 1px rgb(240 214 150 / 0.14),
+    0 26px 56px rgb(0 0 0 / 0.68),
+    0 0 36px rgb(201 155 59 / 0.1);
 }
 
 /* ------------------------------------------------------------- tela ------ */
@@ -129,12 +137,15 @@ const frameStyle = computed(() => ({
   background: #0a0a0c;
 }
 
+/* Segundo filete, agora rente à imagem — separa a tela do bezel. */
 .device--desktop .device__screen {
   border-radius: clamp(0.15rem, 0.3vw, 0.3rem);
+  box-shadow: inset 0 0 0 1px rgb(214 176 96 / 0.34);
 }
 
 .device--phone .device__screen {
   border-radius: clamp(1.6rem, 2.8vw, 2.6rem);
+  box-shadow: inset 0 0 0 1px rgb(214 176 96 / 0.3);
 }
 
 /* O iframe vive em tamanho real e é reduzido a partir do canto superior. */

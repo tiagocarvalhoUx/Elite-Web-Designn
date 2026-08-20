@@ -9,3 +9,10 @@ export type IconName =
   | 'close'
   | 'arrow'
   | 'check'
+  // Serviços
+  | 'globe'
+  | 'bag'
+  | 'mobile'
+  | 'layers'
+  | 'bolt'
+  | 'chart'

@@ -7,8 +7,11 @@ export interface FooterColumn {
 }
 
 /**
- * Navegação secundária. Todos os destinos são âncoras existentes nesta página —
- * nenhum link aponta para uma rota que ainda não existe.
+ * Navegação secundária.
+ *
+ * Sendo uma página única, vários rótulos apontam para a mesma âncora — cada um
+ * leva à seção que de fato responde por aquele assunto. Nenhum destino aponta
+ * para uma rota inexistente.
  */
 export const footerColumns: readonly FooterColumn[] = [
   {
@@ -17,7 +20,8 @@ export const footerColumns: readonly FooterColumn[] = [
     links: [
       { id: 'sobre', label: 'Sobre nós', href: '#servicos' },
       { id: 'metodologia', label: 'Metodologia', href: '#servicos' },
-      { id: 'autoridade', label: 'Números', href: '#autoridade' },
+      { id: 'diferenciais', label: 'Diferenciais', href: '#servicos' },
+      { id: 'depoimentos', label: 'Depoimentos', href: '#autoridade' },
     ],
   },
   {
@@ -25,8 +29,9 @@ export const footerColumns: readonly FooterColumn[] = [
     title: 'Serviços',
     links: [
       { id: 'sites', label: 'Sites institucionais', href: '#servicos' },
-      { id: 'ecommerce', label: 'E-commerce de luxo', href: '#servicos' },
+      { id: 'ecommerce', label: 'E-commerce', href: '#servicos' },
       { id: 'apps', label: 'Aplicativos', href: '#servicos' },
+      { id: 'suporte', label: 'Manutenção e suporte', href: '#contato' },
     ],
   },
   {
@@ -34,7 +39,8 @@ export const footerColumns: readonly FooterColumn[] = [
     title: 'Portfólio',
     links: [
       { id: 'todos', label: 'Todos os projetos', href: '#projetos' },
-      { id: 'orcamento', label: 'Pedir orçamento', href: '#contato' },
+      { id: 'cases', label: 'Cases de sucesso', href: '#projetos' },
+      { id: 'marcas', label: 'Marcas atendidas', href: '#projetos' },
     ],
   },
 ]
