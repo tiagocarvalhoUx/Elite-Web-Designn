@@ -11,13 +11,13 @@ import AppIcon from '@/components/ui/AppIcon.vue'
 const { fields, status, errorFor, touch, onWhatsappInput, submit } = useContactForm()
 
 const BASE =
-  'w-full bg-transparent font-sans text-[0.95rem] text-ivory transition-colors duration-300 ease-luxe placeholder:text-muted/70 hover:border-gold-500/60 focus:border-gold-300 focus:outline-none aria-invalid:border-[#e0a04a]'
+  'w-full bg-transparent font-sans text-[1.05rem] text-ivory transition-colors duration-300 ease-luxe placeholder:text-muted/80 hover:border-gold-500/60 focus:border-gold-300 focus:outline-none aria-invalid:border-[#e0a04a] lg:text-[0.95rem] lg:placeholder:text-muted/70'
 
 /** Campo em filete, como na arte original. */
-const CONTROL = `${BASE} border-0 border-b border-gold-500/35 px-0 py-3`
+const CONTROL = `${BASE} border-0 border-b border-gold-500/55 px-0 py-3.5 lg:border-gold-500/35 lg:py-3`
 
 /** Caixa fechada — só a mensagem, que precisa de área de escrita. */
-const BOX = `${BASE} min-h-36 resize-y border border-gold-500/35 px-4 py-3 leading-relaxed`
+const BOX = `${BASE} min-h-36 resize-y border border-gold-500/55 px-4 py-3.5 leading-relaxed lg:border-gold-500/35 lg:py-3`
 </script>
 
 <template>
@@ -66,8 +66,8 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/35 px-4 py-3 leadi
               />
             </div>
 
-            <div class="grid gap-x-12 gap-y-8 md:grid-cols-2">
-              <div class="flex flex-col gap-8">
+            <div class="grid gap-x-12 gap-y-10 md:grid-cols-2 lg:gap-y-8">
+              <div class="flex flex-col gap-10 lg:gap-8">
                 <FormField id="nome" v-slot="slot" label="Nome" :error="errorFor('name')">
                   <input
                     :id="slot.id"
@@ -112,7 +112,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/35 px-4 py-3 leadi
                     name="whatsapp"
                     autocomplete="tel-national"
                     inputmode="tel"
-                    placeholder="(18) 9 9999-9999"
+                    placeholder="(18) 99999-9999"
                     :class="CONTROL"
                     :aria-invalid="slot.invalid"
                     :aria-describedby="slot.describedBy"
@@ -122,7 +122,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/35 px-4 py-3 leadi
                 </FormField>
               </div>
 
-              <div class="flex flex-col gap-8">
+              <div class="flex flex-col gap-10 lg:gap-8">
                 <FormField
                   id="tipo"
                   v-slot="slot"

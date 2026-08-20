@@ -20,7 +20,13 @@ const describedBy = computed(() => {
 
 <template>
   <div class="flex flex-col gap-2">
-    <label :for="id" class="label-caps text-gold-400/90">{{ label }}</label>
+    <!-- No toque o rótulo precisa de mais peso: é a única âncora do campo. -->
+    <label
+      :for="id"
+      class="label-caps text-[0.8rem] font-semibold tracking-[0.2em] text-gold-300 lg:text-eyebrow lg:font-medium lg:tracking-luxe lg:text-gold-400/90"
+    >
+      {{ label }}
+    </label>
 
     <slot :id="id" :described-by="describedBy" :invalid="Boolean(error)" />
 

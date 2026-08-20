@@ -27,14 +27,14 @@ export function digitsOf(value: string): string {
   return value.replace(/\D/g, '')
 }
 
-/** Máscara progressiva para telefone brasileiro: (18) 9 9999-9999 */
+/** Máscara progressiva no formato brasileiro corrente: (18) 98114-2927 */
 export function maskPhone(value: string): string {
   const d = digitsOf(value).slice(0, 11)
   if (d.length <= 2) return d
   const ddd = `(${d.slice(0, 2)})`
   if (d.length <= 6) return `${ddd} ${d.slice(2)}`
   if (d.length <= 10) return `${ddd} ${d.slice(2, 6)}-${d.slice(6)}`
-  return `${ddd} ${d.slice(2, 3)} ${d.slice(3, 7)}-${d.slice(7)}`
+  return `${ddd} ${d.slice(2, 7)}-${d.slice(7)}`
 }
 
 export function useContactForm() {

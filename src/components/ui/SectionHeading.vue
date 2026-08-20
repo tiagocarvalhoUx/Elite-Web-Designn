@@ -9,10 +9,14 @@ withDefaults(defineProps<{ title: string; id?: string; as?: 'h2' | 'h3'; divider
 
 <template>
   <header class="flex flex-col items-center gap-5 text-center">
+    <!--
+      No mobile o título ganha corpo e entreletra: na tela estreita ele é o
+      único elemento capaz de abrir a seção, sem a folga que o desktop tem.
+    -->
     <component
       :is="as"
       :id="id"
-      class="text-gold-gradient display-caps text-[clamp(2rem,4.2vw,3.25rem)]"
+      class="text-gold-gradient display-caps text-[clamp(2.35rem,7vw,3.25rem)] tracking-[0.09em] lg:tracking-[0.02em]"
     >
       {{ title }}
     </component>
