@@ -78,11 +78,16 @@ as $$
   select exists (select 1 from public.admins where user_id = auth.uid());
 $$;
 
--- Administradores atuais. Para liberar mais alguém, pegue o UID em
--- Authentication → Users e acrescente uma linha aqui.
-insert into public.admins (user_id, note) values
-  ('e4da495f-61c1-4284-b606-80191684140a', 'eliteprimestoreselite@gmail.com'),
-  ('8de9c29e-2f8d-4561-8f71-ce70449491a1', 'tiago_carvalho07@yahoo.com.br')
+-- Administradores atuais, localizados pelo e-mail em auth.users em vez de
+-- UID copiado à mão — um UID errado aqui trancaria o painel sem aviso nenhum.
+-- Para liberar mais alguém, acrescente o e-mail na lista abaixo.
+insert into public.admins (user_id, note)
+select u.id, u.email
+from auth.users u
+where u.email in (
+  'eliteprimestoreselite@gmail.com',
+  'tiago_carvalho07@yahoo.com.br'
+)
 on conflict (user_id) do nothing;
 
 -- ------------------------------------------------------------------- RLS ----
