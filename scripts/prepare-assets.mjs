@@ -120,6 +120,27 @@ async function metaImages() {
       .toFile(path.join(PUBLIC, `icon-${size}.png`))
   }
 
+  /**
+   * Ícone maskable: o Android recorta o ícone no formato do sistema e, quando
+   * não existe um declarado, apoia o resultado numa placa branca. Aqui a tinta
+   * vai até a borda e o monograma fica dentro da zona segura (círculo central
+   * de 80%), então o recorte nunca corta a marca nem revela fundo claro.
+   */
+  {
+    const size = 512
+    const glyph = await sharp(trimmed)
+      .resize({ width: Math.round(size * 0.42), fit: 'inside', kernel: 'lanczos3' })
+      .png()
+      .toBuffer()
+
+    await sharp({
+      create: { width: size, height: size, channels: 4, background: '#070706' },
+    })
+      .composite([{ input: glyph, gravity: 'centre' }])
+      .png()
+      .toFile(path.join(PUBLIC, 'icon-maskable-512.png'))
+  }
+
   // Favicon e ícone de toque seguem a mesma construção.
   await sharp(path.join(PUBLIC, 'icon-192.png'))
     .resize(32, 32, { kernel: 'lanczos3' })
