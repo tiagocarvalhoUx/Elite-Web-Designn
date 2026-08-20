@@ -18,14 +18,14 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
     </div>
     <div class="hero__vignette" aria-hidden="true" />
 
-    <SiteContainer as="div" class="relative z-10 pt-32 pb-0 lg:pt-40">
+    <SiteContainer as="div" class="relative z-10 pt-28 pb-0 lg:pt-36">
       <div class="flex flex-col items-center text-center">
         <p data-reveal class="label-caps text-gold-400">{{ site.locationShort }}</p>
 
         <h1
           data-reveal
           style="--reveal-delay: 90ms"
-          class="display-caps mt-7 text-[clamp(2.15rem,9vw,6.5rem)] leading-[1.02] text-ivory"
+          class="display-caps mt-5 text-[clamp(2.15rem,8vw,5.6rem)] leading-[.92] text-ivory"
         >
           <span class="block">Presença digital</span>
           <span class="block">
@@ -39,14 +39,14 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
         <GoldDivider
           data-reveal
           style="--reveal-delay: 160ms"
-          class="mt-9"
+          class="mt-6"
           :width="320"
         />
 
         <p
           data-reveal
           style="--reveal-delay: 200ms"
-          class="mt-8 max-w-[38ch] font-display text-[clamp(1.1rem,2.1vw,1.45rem)] leading-relaxed text-balance text-sand"
+          class="mt-5 max-w-[38ch] font-display text-[clamp(1.1rem,2.1vw,1.45rem)] leading-relaxed text-balance text-sand"
         >
           Sites, lojas e aplicações desenvolvidos sob medida para marcas exigentes.
         </p>
@@ -54,7 +54,7 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
         <div
           data-reveal
           style="--reveal-delay: 260ms"
-          class="mt-10 flex flex-col items-center gap-5 sm:flex-row sm:gap-8"
+          class="mt-7 flex flex-col items-center gap-5 sm:flex-row sm:gap-14"
         >
           <BaseButton href="#contato" variant="solid" size="lg">Solicitar proposta</BaseButton>
           <BaseButton href="#projetos" variant="underline">Ver portfólio</BaseButton>
@@ -64,7 +64,7 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
       <figure
         data-reveal
         style="--reveal-delay: 340ms"
-        class="hero__stage relative mx-auto mt-14 w-full max-w-[720px] lg:mt-20"
+        class="hero__stage relative mx-auto mt-7 w-full max-w-[720px] lg:mt-4"
       >
         <img
           :src="laptop"
@@ -170,17 +170,17 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
 .hero__scatter {
   position: absolute;
   top: 0;
-  left: -14.9%;
-  width: 36%;
+  left: -17%;
+  width: 42%;
   height: 100%;
-  transform: rotate(-27deg);
+  transform: rotate(-34deg);
   transform-origin: top center;
   background: linear-gradient(
     90deg,
     transparent 6%,
-    rgba(170, 126, 49, 0.07) 30%,
-    rgba(226, 189, 105, 0.13) 50%,
-    rgba(170, 126, 49, 0.07) 70%,
+    rgba(170, 126, 49, 0.08) 30%,
+    rgba(226, 189, 105, 0.16) 50%,
+    rgba(170, 126, 49, 0.08) 70%,
     transparent 94%
   );
   mask-image: linear-gradient(
@@ -191,7 +191,7 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
     rgba(0, 0, 0, 0.34) 66%,
     transparent 88%
   );
-  filter: blur(48px);
+  filter: blur(58px);
 }
 
 /*
@@ -201,10 +201,10 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
 .hero__beam {
   position: absolute;
   top: 0;
-  left: -3.9%;
-  width: 14%;
+  left: -4.8%;
+  width: 17%;
   height: 100%;
-  transform: rotate(-27deg);
+  transform: rotate(-34deg);
   transform-origin: top center;
   /*
    * Sem `filter` aqui de propósito: um desfoque no pai também desfoca os
@@ -225,9 +225,9 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
   background: linear-gradient(
     90deg,
     transparent 18%,
-    rgba(170, 126, 49, 0.12) 36%,
-    rgba(226, 189, 105, 0.24) 50%,
-    rgba(170, 126, 49, 0.12) 64%,
+    rgba(170, 126, 49, 0.14) 34%,
+    rgba(226, 189, 105, 0.27) 50%,
+    rgba(170, 126, 49, 0.14) 66%,
     transparent 82%
   );
   /*
@@ -244,7 +244,7 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
     rgba(0, 0, 0, 0.2) 68%,
     transparent 84%
   );
-  filter: blur(20px);
+  filter: blur(26px);
 }
 
 /*
@@ -255,11 +255,11 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
 .hero__beam::after {
   background: linear-gradient(
     90deg,
-    transparent 47.2%,
-    rgba(214, 172, 82, 0.6) 48.7%,
-    rgba(255, 248, 230, 1) 50%,
-    rgba(214, 172, 82, 0.6) 51.3%,
-    transparent 52.8%
+    transparent 44%,
+    rgba(214, 172, 82, 0.32) 47%,
+    rgba(255, 239, 199, 0.72) 50%,
+    rgba(214, 172, 82, 0.32) 53%,
+    transparent 56%
   );
   mask-image:
     linear-gradient(
@@ -286,7 +286,7 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
       #000 72%
     );
   mask-composite: intersect;
-  filter: blur(1.7px);
+  filter: blur(4px);
 }
 
 .hero__vignette {

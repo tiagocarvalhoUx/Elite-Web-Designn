@@ -48,28 +48,5 @@ const isFilled = computed(() => FILLED.has(props.name))
     <path v-else-if="name === 'close'" d="m6 6 12 12M18 6 6 18" />
     <path v-else-if="name === 'arrow'" d="M4 12h15m-5.5-5.5L19 12l-5.5 5.5" />
     <path v-else-if="name === 'check'" d="m4.5 12.5 5 5 10-11" />
-    <template v-else-if="name === 'globe'">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z" />
-    </template>
-    <template v-else-if="name === 'bag'">
-      <path d="M4.5 8h15l-1.1 11.2a1.8 1.8 0 0 1-1.8 1.6H7.4a1.8 1.8 0 0 1-1.8-1.6L4.5 8Z" />
-      <path d="M8.75 8V6.4a3.25 3.25 0 0 1 6.5 0V8" />
-    </template>
-    <template v-else-if="name === 'mobile'">
-      <rect x="6.75" y="2.75" width="10.5" height="18.5" rx="2.4" />
-      <path d="M10.6 5.6h2.8" />
-      <path d="M12 18.1h.01" />
-    </template>
-    <template v-else-if="name === 'layers'">
-      <path d="m12 3 8.5 4.6L12 12.2 3.5 7.6 12 3Z" />
-      <path d="m3.5 12.2 8.5 4.6 8.5-4.6" />
-      <path d="m3.5 16.6 8.5 4.6 8.5-4.6" />
-    </template>
-    <path v-else-if="name === 'bolt'" d="M13.4 2.5 4.8 13.4h6.1l-.9 8.1 8.6-10.9h-6.1l.9-8.1Z" />
-    <template v-else-if="name === 'chart'">
-      <path d="M3.5 20.5h17" />
-      <path d="M7 20.5v-7M12 20.5V6.5M17 20.5v-10" />
-    </template>
   </svg>
 </template>
