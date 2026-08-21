@@ -4,6 +4,7 @@ import ServicesSection from '@/components/sections/ServicesSection.vue'
 import PortfolioSection from '@/components/sections/PortfolioSection.vue'
 import BrandStatementSection from '@/components/sections/BrandStatementSection.vue'
 import StatsSection from '@/components/sections/StatsSection.vue'
+import ShowreelSection from '@/components/sections/ShowreelSection.vue'
 import ContactSection from '@/components/sections/ContactSection.vue'
 </script>
 
@@ -14,5 +15,7 @@ import ContactSection from '@/components/sections/ContactSection.vue'
   <PortfolioSection />
   <BrandStatementSection />
   <StatsSection />
+  <!-- O filme fecha o argumento e desemboca direto no formulário. -->
+  <ShowreelSection />
   <ContactSection />
 </template>

@@ -6,3 +6,7 @@ dist
 
 .vercel
 .env*
+
+# Master do filme (43 MB), só na raiz. A barra inicial impede que o padrão
+# também capture src/assets/video, cujos derivados a build precisa.
+/video/
