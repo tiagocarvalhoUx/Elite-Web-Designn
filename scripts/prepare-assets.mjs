@@ -158,10 +158,14 @@ async function metaImages() {
     .webp({ quality: 92, effort: 6 })
     .toFile(path.join(PUBLIC, 'brand-mark.webp'))
 
-  await sharp(path.join(SHOTS, 'projeto_mrv_luxo.png'))
-    .extract({ left: 0, top: 130, width: 2176, height: 1142 })
-    .resize({ width: 1200, height: 630, fit: 'cover', position: 'centre' })
-    .jpeg({ quality: 82, mozjpeg: true })
+  /**
+   * Cartão de compartilhamento, a partir da arte dedicada em /images.
+   * Ela já nasce em 1731×909 — a mesma proporção do formato Open Graph —,
+   * então basta reduzir, sem recorte que amputaria a composição.
+   */
+  await sharp(path.join(SHOTS, 'WD-opengraph.png'))
+    .resize({ width: 1200, height: 630, fit: 'cover', position: 'centre', kernel: 'lanczos3' })
+    .jpeg({ quality: 88, mozjpeg: true })
     .toFile(path.join(PUBLIC, 'og-image.jpg'))
   console.log('meta: icons + brand-mark + og-image')
 }
