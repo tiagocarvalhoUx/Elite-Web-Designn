@@ -18,6 +18,28 @@ const FAILSAFE_MS = 2500
 
 type Register = (elements: HTMLElement[]) => void
 
+/**
+ * Variantes de entrada, com os mesmos nomes do AOS para quem vier do
+ * `data-aos`. Aqui elas rodam no motor que o site já usa, sem uma segunda
+ * biblioteca disputando opacity e transform nos mesmos elementos.
+ *
+ * Nenhuma variante escala texto: durante a interpolação a fonte fica borrada e
+ * o corpo do texto perde legibilidade justamente quando entra em cena.
+ */
+const VARIANTS = {
+  'fade-up': { opacity: 0, y: 26, scale: 1 },
+  'fade-down': { opacity: 0, y: -26, scale: 1 },
+  'zoom-in': { opacity: 0, y: 0, scale: 0.94 },
+  'zoom-in-up': { opacity: 0, y: 30, scale: 0.95 },
+} as const
+
+type VariantName = keyof typeof VARIANTS
+
+function variantOf(el: HTMLElement): VariantName {
+  const raw = el.dataset['reveal']
+  return raw && raw in VARIANTS ? (raw as VariantName) : 'fade-up'
+}
+
 function revealNow(elements: HTMLElement[]): void {
   elements.forEach((el) => el.classList.add(REVEALED))
 }
@@ -127,19 +149,33 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): { register: Register; 
   }
 
   function animateOnScroll(elements: HTMLElement[]): void {
-    ScrollTrigger.batch(elements, {
-      start: 'top 88%',
-      once: true,
-      onEnter: (batch) =>
-        gsap.to(batch, {
-          opacity: 1,
-          y: 0,
-          duration: 0.95,
-          ease: 'power3.out',
-          stagger: 0.09,
-          overwrite: true,
-        }),
-    })
+    // Um lote por variante: o ScrollTrigger escalona dentro do grupo, e
+    // misturar direções no mesmo lote produziria um vaivém sem sentido.
+    const groups = new Map<VariantName, HTMLElement[]>()
+    for (const el of elements) {
+      const name = variantOf(el)
+      const group = groups.get(name)
+      if (group) group.push(el)
+      else groups.set(name, [el])
+    }
+
+    for (const [name, group] of groups) {
+      const isZoom = name.startsWith('zoom')
+      ScrollTrigger.batch(group, {
+        start: 'top 88%',
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: isZoom ? 1.05 : 0.95,
+            ease: 'power3.out',
+            stagger: 0.09,
+            overwrite: true,
+          }),
+      })
+    }
   }
 
   function animateCounters(scope: HTMLElement[]): void {
@@ -176,7 +212,7 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): { register: Register; 
     context.add(() => {
       // O GSAP passa a ser dono do estado: inline vence o CSS e evita conflito
       // entre a transição declarada na folha e as tweens.
-      gsap.set(elements, { opacity: 0, y: 26 })
+      for (const el of elements) gsap.set(el, VARIANTS[variantOf(el)])
       revealNow(elements)
 
       const hero = elements.filter((el) => el.closest('#inicio'))

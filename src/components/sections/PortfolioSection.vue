@@ -27,7 +27,7 @@ onMounted(() => {
         <li
           v-for="(project, index) in remoteProjects"
           :key="project.id"
-          data-reveal
+          data-reveal="zoom-in-up"
           :style="{
             '--reveal-delay': `${(index % 3) * 90}ms`,
             '--trace-delay': `${index * -1.1}s`,

@@ -55,7 +55,7 @@ onBeforeUnmount(() => observer?.disconnect())
       <div
         class="grid items-center gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)] lg:gap-16"
       >
-        <figure data-reveal class="film mx-auto w-full max-w-[340px] lg:mx-0 lg:max-w-[380px]">
+        <figure data-reveal="zoom-in" class="film mx-auto w-full max-w-[340px] lg:mx-0 lg:max-w-[380px]">
           <div class="film__frame gold-trace" style="--trace-duration: 7.5s">
             <video
               ref="video"
@@ -80,21 +80,25 @@ onBeforeUnmount(() => observer?.disconnect())
           </div>
         </figure>
 
-        <div data-reveal style="--reveal-delay: 120ms" class="text-center lg:text-left">
-          <p class="label-caps text-gold-400">Filme da marca</p>
+        <div class="text-center lg:text-left">
+          <p data-reveal="fade-down" class="label-caps text-gold-400">Filme da marca</p>
 
-          <h2 class="display-caps mt-4 text-[clamp(2.1rem,5vw,3.1rem)] text-ivory">
+          <h2
+            data-reveal="fade-up"
+            style="--reveal-delay: 120ms"
+            class="display-caps mt-4 text-[clamp(2.1rem,5vw,3.1rem)] text-ivory"
+          >
             A Elite em 27 segundos
           </h2>
 
-          <p class="mx-auto mt-6 max-w-[46ch] leading-relaxed text-muted lg:mx-0">
+          <p data-reveal="fade-up" class="mx-auto mt-6 max-w-[46ch] leading-relaxed text-muted lg:mx-0">
             Um recorte do que entregamos e do padrão que aplicamos em cada projeto — do
             primeiro traço à publicação.
           </p>
 
           <p class="mt-3 text-sm text-muted/80">O filme tem áudio.</p>
 
-          <div class="mt-9 flex justify-center lg:justify-start">
+          <div data-reveal="fade-up" class="mt-9 flex justify-center lg:justify-start">
             <BaseButton :href="site.whatsappUrl" variant="outline" size="lg" external>
               Falar no WhatsApp
             </BaseButton>

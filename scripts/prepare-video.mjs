@@ -62,4 +62,15 @@ const poster = path.join(OUT, 'showreel-poster.webp')
 run(['-ss', '1.2', '-i', SRC, '-frames:v', '1', '-vf', 'scale=720:-2', '-q:v', '80', poster])
 report('Pôster (WebP)', poster)
 
+/**
+ * Cartão de compartilhamento (1200×630).
+ *
+ * Recortado do master em 1440 px — sem ampliação — no ponto em que a headline
+ * está inteira na tela. A versão anterior mostrava o projeto MRV, que nem
+ * aparece mais no portfólio.
+ */
+const og = path.join(ROOT, 'public', 'og-image.jpg')
+run(['-ss', '1.2', '-i', SRC, '-frames:v', '1', '-vf', 'crop=1440:756:0:500,scale=1200:630', '-q:v', '3', og])
+report('OG (1200×630)', og)
+
 console.log('\nVídeo pronto.')
