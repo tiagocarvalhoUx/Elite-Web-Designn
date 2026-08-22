@@ -60,12 +60,41 @@ function splitValue(text: string): { value: number; suffix: string } | null {
   return { value: Number(match[1]), suffix: match[2] ?? '' }
 }
 
+/**
+ * Pausa os filetes de luz que não estão em tela. Cada um repinta um gradiente
+ * cônico a cada quadro; com vários elementos, fazer isso fora da vista custava
+ * tempo de thread principal sem nada em troca.
+ */
+function watchTraces(): () => void {
+  if (!('IntersectionObserver' in window)) return () => {}
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) entry.target.classList.toggle('is-idle', !entry.isIntersecting)
+    },
+    { rootMargin: '120px' },
+  )
+
+  const scan = () => document.querySelectorAll('.gold-trace').forEach((el) => io.observe(el))
+  scan()
+
+  // Cartões do portfólio chegam depois da resposta do Supabase.
+  const mo = new MutationObserver(scan)
+  mo.observe(document.body, { childList: true, subtree: true })
+
+  return () => {
+    io.disconnect()
+    mo.disconnect()
+  }
+}
+
 export function useMotion(): void {
   let register: Register | null = null
   const queued: HTMLElement[] = []
   let observer: MutationObserver | undefined
   let dispose: (() => void) | undefined
   let failsafe: number | undefined
+  let stopTraces: (() => void) | undefined
 
   /** Antes do registrador existir, guarda; depois, encaminha na hora. */
   function handle(elements: HTMLElement[]): void {
@@ -85,6 +114,7 @@ export function useMotion(): void {
     observer = new MutationObserver(() => handle(claimPending()))
     observer.observe(document.body, { childList: true, subtree: true })
     handle(claimPending())
+    stopTraces = watchTraces()
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     if (reduced) {
@@ -117,6 +147,7 @@ export function useMotion(): void {
   onBeforeUnmount(() => {
     if (failsafe) window.clearTimeout(failsafe)
     observer?.disconnect()
+    stopTraces?.()
     dispose?.()
   })
 }

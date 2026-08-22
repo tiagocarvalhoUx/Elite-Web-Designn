@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './fonts.css';
 
 /* ==========================================================================
    Design tokens — Elite Web Designer
@@ -194,6 +195,15 @@
 
     animation: gold-trace-run var(--trace-duration, 6s) linear infinite;
     animation-delay: var(--trace-delay, 0s);
+  }
+
+  /*
+   * Animar o ângulo repinta o gradiente cônico a cada quadro. Fora da tela isso
+   * é trabalho jogado fora, e com vários elementos pesava na thread principal.
+   * O padrão é rodar — sem JS nada muda; a classe só existe para pausar.
+   */
+  &.is-idle::after {
+    animation-play-state: paused;
   }
 
   @media (prefers-reduced-motion: reduce) {

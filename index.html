@@ -115,11 +115,27 @@
       }
     </style>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Fontes do próprio domínio (npm run fonts). O <link> para o Google bloqueava
+      a primeira pintura por ~887 ms, exigindo DNS e TLS de dois domínios de
+      terceiros antes de desenhar qualquer coisa.
+
+      Só os dois pesos da primeira dobra são pré-carregados: o título do hero e
+      os rótulos em versalete. Os demais o navegador busca quando precisar.
+    -->
     <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600&display=swap"
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/cormorant-400-latin.woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href="/fonts/manrope-500-latin.woff2"
+      crossorigin
     />
 
     <script type="application/ld+json">

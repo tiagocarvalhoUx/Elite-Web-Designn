@@ -96,7 +96,7 @@ onBeforeUnmount(() => observer?.disconnect())
             primeiro traço à publicação.
           </p>
 
-          <p class="mt-3 text-sm text-muted/80">O filme tem áudio.</p>
+          <p class="mt-3 text-sm text-muted">O filme tem áudio.</p>
 
           <div data-reveal="fade-up" class="mt-9 flex justify-center lg:justify-start">
             <BaseButton :href="site.whatsappUrl" variant="outline" size="lg" external>
