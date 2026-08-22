@@ -175,7 +175,9 @@ async function onImage(event: Event): Promise<void> {
   try {
     formError.value = 'Otimizando imagem...'
     const bitmap = await createImageBitmap(file)
-    const scale = Math.min(1, 1800 / bitmap.width, 1200 / bitmap.height)
+    // 1400 px cobre a ampliação (~1024 px) e os cartões em retina (~740 px).
+    // Em 1800 px cada projeto chegava a 238 kB e disputava banda com o LCP.
+    const scale = Math.min(1, 1400 / bitmap.width, 1000 / bitmap.height)
     const canvas = document.createElement('canvas')
     canvas.width = Math.round(bitmap.width * scale)
     canvas.height = Math.round(bitmap.height * scale)
@@ -185,7 +187,7 @@ async function onImage(event: Event): Promise<void> {
     bitmap.close()
 
     const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/webp', 0.86),
+      canvas.toBlob(resolve, 'image/webp', 0.82),
     )
     if (!blob) throw new Error('Conversão falhou')
 

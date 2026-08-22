@@ -18,7 +18,14 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 
 const video = ref<HTMLVideoElement | null>(null)
 const started = ref(false)
+/**
+ * O atributo `poster` baixa a imagem junto com a página, mesmo com
+ * `preload="none"` e mesmo estando esta seção bem abaixo da dobra. Só a
+ * definimos quando o filme se aproxima da tela.
+ */
+const posterSrc = ref('')
 let observer: IntersectionObserver | undefined
+let posterWatcher: IntersectionObserver | undefined
 
 async function play(): Promise<void> {
   const el = video.value
@@ -34,7 +41,20 @@ async function play(): Promise<void> {
 }
 
 onMounted(() => {
-  if (!('IntersectionObserver' in window) || !video.value) return
+  if (!('IntersectionObserver' in window) || !video.value) {
+    posterSrc.value = poster
+    return
+  }
+
+  posterWatcher = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry?.isIntersecting) return
+      posterSrc.value = poster
+      posterWatcher?.disconnect()
+    },
+    { rootMargin: '600px' },
+  )
+  posterWatcher.observe(video.value)
 
   // Sair da tela com o filme tocando desperdiça banda e bateria.
   observer = new IntersectionObserver(
@@ -46,7 +66,10 @@ onMounted(() => {
   observer.observe(video.value)
 })
 
-onBeforeUnmount(() => observer?.disconnect())
+onBeforeUnmount(() => {
+  observer?.disconnect()
+  posterWatcher?.disconnect()
+})
 </script>
 
 <template>
@@ -60,7 +83,7 @@ onBeforeUnmount(() => observer?.disconnect())
             <video
               ref="video"
               class="film__video"
-              :poster="poster"
+              :poster="posterSrc || undefined"
               preload="none"
               playsinline
               :controls="started"

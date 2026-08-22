@@ -15,6 +15,7 @@ npm run type-check   # apenas o type-check
 npm run assets       # regenera src/assets/** e public/** a partir da arte original
 npm run supabase:check # verifica schema, bucket e políticas de RLS
 npm run video        # transcodifica o filme da marca (requer ffmpeg no PATH)
+npm run fonts        # rebaixa as fontes do Google para public/fonts
 ```
 
 ## Onde mexer
