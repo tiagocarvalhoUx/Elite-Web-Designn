@@ -115,8 +115,15 @@ export function initPixel(): void {
   }
 
   // Fora do caminho crítico: o pixel nunca disputa com a primeira pintura.
-  if ('requestIdleCallback' in window) {
-    window.requestIdleCallback(start, { timeout: 3500 })
+  //
+  // `'requestIdleCallback' in window` pareceria mais natural, mas o operador
+  // `in` tenta estreitar o tipo do próprio `window` — e como esta API está
+  // declarada como sempre presente no lib.dom desta versão do TypeScript, o
+  // compilador conclui que o ramo `else` é inatingível e o reduz a `never`.
+  // Ler a função direto evita estreitar `window`.
+  const scheduleIdle = window.requestIdleCallback
+  if (scheduleIdle) {
+    scheduleIdle(start, { timeout: 3500 })
   } else {
     window.setTimeout(start, 1500)
   }
