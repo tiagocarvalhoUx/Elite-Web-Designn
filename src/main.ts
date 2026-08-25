@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import './styles/main.css'
+import { initPixel } from './lib/metaPixel'
 
 declare global {
   interface Window {
@@ -9,6 +10,8 @@ declare global {
 }
 
 createApp(App).mount('#app')
+
+initPixel()
 
 /**
  * Avisa a abertura declarada no index.html de que o app já pintou. Ela também

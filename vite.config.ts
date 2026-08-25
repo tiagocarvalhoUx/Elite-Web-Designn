@@ -53,8 +53,26 @@ function siteUrlPlugin(): Plugin {
   }
 }
 
+/**
+ * Preenche o pixel de imagem do noscript com o ID configurado, ou remove o
+ * bloco inteiro quando não há Meta Pixel nesta build — HTML nunca aponta para
+ * um `id=` vazio.
+ */
+function metaPixelNoscriptPlugin(): Plugin {
+  const pixelId = process.env['VITE_META_PIXEL_ID']
+
+  return {
+    name: 'meta-pixel-noscript',
+    transformIndexHtml: (html) => {
+      const block = /<!--META_PIXEL_START-->[\s\S]*?<!--META_PIXEL_END-->/
+      if (!pixelId) return html.replace(block, '')
+      return html.replaceAll('%META_PIXEL_ID%', pixelId)
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [vue(), tailwindcss(), siteUrlPlugin()],
+  plugins: [vue(), tailwindcss(), siteUrlPlugin(), metaPixelNoscriptPlugin()],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },

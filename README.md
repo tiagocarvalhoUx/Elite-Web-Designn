@@ -82,6 +82,53 @@ VITE_CONTACT_ENDPOINT=https://api.exemplo.com/contato
 O endpoint recebe `POST` com `{ name, email, whatsapp, projectType, message }`.
 Um honeypot (`company`) descarta envios automatizados antes da requisição.
 
+## Meta Pixel (Facebook/Instagram Ads)
+
+**Configuração:**
+
+1. No Gerenciador de Eventos (business.facebook.com/events_manager2), pegue o
+   ID do pixel — um número com ~16 dígitos.
+2. Adicione em `.env.local`:
+   ```bash
+   VITE_META_PIXEL_ID=1234567890123456
+   ```
+3. `npm run build` (ou redeploy). **Sem esta variável, nada é carregado** —
+   nenhum script, nenhuma requisição ao Facebook.
+
+**Eventos que o site envia sozinho**, sem precisar tocar em cada botão:
+
+| Evento | Quando dispara | Onde no código |
+|---|---|---|
+| `PageView` | Toda visita | automático |
+| `Lead` | Formulário de contato enviado com sucesso | `useContactForm.ts` |
+| `ViewContent` | Visitante abre um projeto do portfólio | `PortfolioSection.vue` |
+| `Contact` | Clique em qualquer link do WhatsApp | automático (delegação de evento) |
+| `AssistiuFilme` *(custom)* | Clique em play no filme da marca | `ShowreelSection.vue` |
+
+No Gerenciador de Eventos, `AssistiuFilme` aparece em "Eventos personalizados"
+— para usá-lo em públicos ou otimização de campanha, crie um evento
+personalizado apontando para ele.
+
+**Correspondência avançada:** ao enviar o `Lead`, o e-mail e o WhatsApp que a
+pessoa acabou de digitar são normalizados e reenviados (`identify()` em
+`metaPixel.ts`) — é o que mais pesa na nota de "qualidade da correspondência"
+do Meta. O hash desses dados é feito pelo próprio script do Facebook, nunca
+pelo nosso código.
+
+**Deduplicação:** todo evento leva um `eventID` próprio (`crypto.randomUUID`).
+Se no futuro a API de Conversões (server-side) for adicionada, é esse ID que
+evita contar o mesmo Lead duas vezes — uma vinda do navegador, outra do
+servidor.
+
+**Performance:** o script do Meta (~70 kB) só é buscado depois que a página
+termina de carregar (`requestIdleCallback`, com um limite de 1,5 s de
+segurança) — nunca disputa banda com o LCP. Verificado: a requisição sai
+centenas de ms depois do evento `load`.
+
+**Teste:** instale a extensão [Meta Pixel Helper](https://chromewebstore.google.com/detail/meta-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc)
+e abra o site — ela mostra os eventos capturados e sinaliza a nota de qualidade
+de cada um.
+
 ## Assets
 
 As imagens de produção são derivadas da arte original por `npm run assets`

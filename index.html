@@ -214,6 +214,20 @@
         Este site funciona melhor com JavaScript ativado. Fale conosco pelo e-mail
         <a href="mailto:eliteprimestoreselite@gmail.com">eliteprimestoreselite@gmail.com</a>.
       </p>
+      <!--
+        O Meta exige este pixel de imagem como caminho alternativo para quem
+        navega sem JavaScript. O plugin em vite.config.ts remove tudo entre os
+        marcadores abaixo quando VITE_META_PIXEL_ID não está definida.
+      -->
+      <!--META_PIXEL_START-->
+      <img
+        height="1"
+        width="1"
+        style="display: none"
+        src="https://www.facebook.com/tr?id=%META_PIXEL_ID%&ev=PageView&noscript=1"
+        alt=""
+      />
+      <!--META_PIXEL_END-->
     </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>

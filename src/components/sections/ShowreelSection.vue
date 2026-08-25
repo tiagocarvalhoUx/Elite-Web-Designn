@@ -6,6 +6,7 @@ import webm from '@/assets/video/showreel.webm'
 import poster from '@/assets/video/showreel-poster.webp'
 import SiteContainer from '@/components/ui/SiteContainer.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
+import { trackCustom } from '@/lib/metaPixel'
 
 /**
  * Filme da marca.
@@ -31,6 +32,7 @@ async function play(): Promise<void> {
   const el = video.value
   if (!el) return
   started.value = true
+  trackCustom('AssistiuFilme', { content_name: 'Filme da marca' })
   try {
     await el.play()
   } catch {

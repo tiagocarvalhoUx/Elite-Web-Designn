@@ -6,9 +6,20 @@ import SectionHeading from '@/components/ui/SectionHeading.vue'
 import SiteContainer from '@/components/ui/SiteContainer.vue'
 import ProjectCard from '@/components/ui/ProjectCard.vue'
 import ProjectLightbox from '@/components/ui/ProjectLightbox.vue'
+import { track } from '@/lib/metaPixel'
 
 /** O portfólio vem inteiro do painel; nada é fixado no código. */
 const selected = ref<PortfolioProject | null>(null)
+
+function openProject(project: PortfolioProject): void {
+  selected.value = project
+  track('ViewContent', {
+    content_type: 'product',
+    content_ids: project.id,
+    content_name: project.title,
+    content_category: project.category,
+  })
+}
 
 onMounted(() => {
   void loadRemoteProjects()
@@ -34,7 +45,7 @@ onMounted(() => {
             '--trace-duration': `${6.5 + (index % 3) * 0.6}s`,
           }"
         >
-          <ProjectCard :project="project" @open="selected = project" />
+          <ProjectCard :project="project" @open="openProject(project)" />
         </li>
       </ul>
 

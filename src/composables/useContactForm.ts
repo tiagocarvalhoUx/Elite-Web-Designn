@@ -1,5 +1,6 @@
 import { computed, reactive, ref } from 'vue'
 import { site } from '@/data/site'
+import { identify, track } from '@/lib/metaPixel'
 
 export interface ContactFields {
   name: string
@@ -146,6 +147,15 @@ export function useContactForm() {
           subject,
         )}&body=${encodeURIComponent(buildBody())}`
       }
+
+      // A correspondência avançada usa o que a pessoa acabou de digitar; é o
+      // que mais pesa na nota de qualidade do Meta. Precisa vir antes do
+      // evento, senão o Lead sai sem esses dados.
+      identify({ email: fields.email, phone: fields.whatsapp })
+      track('Lead', {
+        content_name: fields.projectType || 'Solicitação de proposta',
+        content_category: 'Contato',
+      })
 
       status.value = 'success'
       reset()
