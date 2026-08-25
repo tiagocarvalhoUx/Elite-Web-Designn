@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -13,8 +13,8 @@ import tailwindcss from '@tailwindcss/vite'
  * A ordem abaixo faz o valor acompanhar o ambiente sozinho — inclusive quando
  * um domínio próprio for ligado na Vercel, sem precisar editar o código.
  */
-function resolveSiteUrl(): string {
-  const explicit = process.env['VITE_SITE_URL']
+function resolveSiteUrl(env: Record<string, string>): string {
+  const explicit = env['VITE_SITE_URL']
   if (explicit) return explicit.replace(/\/$/, '')
 
   const vercel = process.env['VERCEL_PROJECT_PRODUCTION_URL']
@@ -24,9 +24,7 @@ function resolveSiteUrl(): string {
 }
 
 /** Injeta o endereço no HTML e gera robots.txt e sitemap.xml com ele. */
-function siteUrlPlugin(): Plugin {
-  const siteUrl = resolveSiteUrl()
-
+function siteUrlPlugin(siteUrl: string): Plugin {
   return {
     name: 'site-url',
     transformIndexHtml: (html) => html.replaceAll('%SITE_URL%', siteUrl),
@@ -58,9 +56,7 @@ function siteUrlPlugin(): Plugin {
  * bloco inteiro quando não há Meta Pixel nesta build — HTML nunca aponta para
  * um `id=` vazio.
  */
-function metaPixelNoscriptPlugin(): Plugin {
-  const pixelId = process.env['VITE_META_PIXEL_ID']
-
+function metaPixelNoscriptPlugin(pixelId: string | undefined): Plugin {
   return {
     name: 'meta-pixel-noscript',
     transformIndexHtml: (html) => {
@@ -71,14 +67,27 @@ function metaPixelNoscriptPlugin(): Plugin {
   }
 }
 
-export default defineConfig({
-  plugins: [vue(), tailwindcss(), siteUrlPlugin(), metaPixelNoscriptPlugin()],
-  resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-  },
-  build: {
-    target: 'es2022',
-    cssCodeSplit: false,
-    assetsInlineLimit: 2048,
-  },
+export default defineConfig(({ mode }) => {
+  // Vite só popula `import.meta.env` automaticamente para o código do app —
+  // o próprio arquivo de config roda em Node puro. `loadEnv` é o que lê
+  // .env.local aqui; sem ele, process.env fica vazio para essas variáveis e
+  // qualquer plugin que dependa delas silenciosamente não faz nada.
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return {
+    plugins: [
+      vue(),
+      tailwindcss(),
+      siteUrlPlugin(resolveSiteUrl(env)),
+      metaPixelNoscriptPlugin(env['VITE_META_PIXEL_ID']),
+    ],
+    resolve: {
+      alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+    },
+    build: {
+      target: 'es2022',
+      cssCodeSplit: false,
+      assetsInlineLimit: 2048,
+    },
+  }
 })
