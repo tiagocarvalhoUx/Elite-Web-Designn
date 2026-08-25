@@ -51,7 +51,14 @@ const menuOpen = ref(false)
       </nav>
 
       <div class="hidden lg:block">
-        <BaseButton href="#contato" variant="outline">Pedir orçamento</BaseButton>
+        <BaseButton
+          href="#contato"
+          variant="outline"
+          pixel-event="CliqueOrcamento"
+          pixel-label="Pedir orçamento (header)"
+        >
+          Pedir orçamento
+        </BaseButton>
       </div>
 
       <button

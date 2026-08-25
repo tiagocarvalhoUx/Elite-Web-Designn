@@ -56,7 +56,15 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
           style="--reveal-delay: 260ms"
           class="mt-7 flex flex-col items-center gap-5 sm:flex-row sm:gap-14"
         >
-          <BaseButton href="#contato" variant="solid" size="lg">Solicitar proposta</BaseButton>
+          <BaseButton
+            href="#contato"
+            variant="solid"
+            size="lg"
+            pixel-event="CliqueOrcamento"
+            pixel-label="Solicitar proposta (hero)"
+          >
+            Solicitar proposta
+          </BaseButton>
           <BaseButton href="#projetos" variant="underline">Ver portfólio</BaseButton>
         </div>
       </div>

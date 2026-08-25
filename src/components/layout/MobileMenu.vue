@@ -65,7 +65,14 @@ function onKeydown(event: KeyboardEvent): void {
 
         <div class="mt-10 flex flex-col items-start gap-6">
           <GoldDivider :width="200" />
-          <BaseButton href="#contato" variant="solid" size="lg" @click="emit('close')">
+          <BaseButton
+            href="#contato"
+            variant="solid"
+            size="lg"
+            pixel-event="CliqueOrcamento"
+            pixel-label="Pedir orçamento (menu mobile)"
+            @click="emit('close')"
+          >
             Pedir orçamento
           </BaseButton>
           <a

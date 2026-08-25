@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { trackCustom } from '@/lib/metaPixel'
 
 type Variant = 'solid' | 'outline' | 'underline'
 type Size = 'md' | 'lg'
@@ -13,12 +14,23 @@ const props = withDefaults(
     disabled?: boolean
     loading?: boolean
     external?: boolean
+    /**
+     * Nome de um evento personalizado do Meta Pixel a disparar no clique — só
+     * para CTAs de intenção real ("Pedir orçamento"), nunca para navegação
+     * comum (menu, rodapé), que inflaria o sinal sem significar interesse.
+     */
+    pixelEvent?: string
+    pixelLabel?: string
   }>(),
   { variant: 'solid', size: 'md', type: 'button', disabled: false, loading: false, external: false },
 )
 
 const tag = computed(() => (props.href ? 'a' : 'button'))
 const inactive = computed(() => props.disabled || props.loading)
+
+function onClick(): void {
+  if (props.pixelEvent) trackCustom(props.pixelEvent, { content_name: props.pixelLabel })
+}
 
 const VARIANTS: Record<Variant, string> = {
   solid:
@@ -54,6 +66,7 @@ const SIZES: Record<Size, string> = {
       variant !== 'underline' && 'gold-trace',
       inactive && 'pointer-events-none opacity-55',
     ]"
+    @click="onClick"
   >
     <span
       v-if="loading"
