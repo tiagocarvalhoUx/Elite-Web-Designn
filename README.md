@@ -93,6 +93,39 @@ lead (é ele quem preenche o formulário) mas **nenhuma política de SELECT exis
 para anônimos** — os contatos não podem ser lidos de volta pela chave pública.
 Só administradores leem.
 
+### Aviso por e-mail
+
+Além de gravar no banco, o site pode avisar por e-mail a cada nova solicitação.
+Isso roda numa função de servidor ([`api/notify-lead.ts`](api/notify-lead.ts))
+porque a chave da API de e-mail **não pode ficar no frontend** — qualquer
+variável `VITE_*` é compilada dentro do bundle público.
+
+1. Crie uma conta gratuita em [resend.com](https://resend.com) (3.000 e-mails/mês).
+2. Gere uma API key.
+3. Na Vercel → **Settings** → **Environment Variables**, adicione — **sem
+   prefixo `VITE_`**, senão vazam para o navegador:
+
+   | Nome | Valor |
+   |---|---|
+   | `RESEND_API_KEY` | `re_...` |
+   | `LEAD_NOTIFY_TO` | o e-mail que recebe os avisos |
+   | `LEAD_NOTIFY_FROM` | opcional; veja a limitação abaixo |
+
+4. Redeploy.
+
+> **Limitação do plano gratuito:** sem um domínio verificado, o Resend só envia
+> a partir de `onboarding@resend.dev` e **só para o e-mail dono da conta**. Para
+> mandar de `contato@seudominio.com.br` ou para outros destinatários, é preciso
+> verificar um domínio no painel do Resend.
+
+**O aviso é best-effort:** o lead é gravado no Supabase primeiro. Se o e-mail
+falhar, o formulário **não** acusa erro — o cliente já cumpriu a parte dele, e
+fazê-lo reenviar duplicaria o lead por um problema que não é dele. A solicitação
+continua visível em `/admin`.
+
+Sem `RESEND_API_KEY` configurada, a função responde 204 e nada acontece — o
+site funciona igual, só sem aviso.
+
 ## Meta Pixel (Facebook/Instagram Ads)
 
 **Configuração:**

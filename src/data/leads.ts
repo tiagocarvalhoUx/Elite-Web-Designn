@@ -55,4 +55,30 @@ export async function submitLead(input: LeadInput): Promise<void> {
     const detail = await response.text().catch(() => '')
     throw new Error(`Falha ao registrar a solicitação (HTTP ${response.status}). ${detail}`.trim())
   }
+
+  await notifyByEmail(input)
+}
+
+/**
+ * Dispara o aviso por e-mail. Deliberadamente não lança: o lead já está gravado
+ * neste ponto, e derrubar o formulário porque o aviso falhou faria o cliente
+ * reenviar — duplicando o lead — por um problema que não é dele.
+ */
+async function notifyByEmail(input: LeadInput): Promise<void> {
+  try {
+    await fetch('/api/notify-lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: input.name.trim(),
+        email: input.email.trim(),
+        whatsapp: input.whatsapp.trim(),
+        projectType: input.projectType,
+        message: input.message.trim(),
+        source: typeof window === 'undefined' ? '' : window.location.href,
+      }),
+    })
+  } catch {
+    // Silencioso por design — ver comentário acima.
+  }
 }
