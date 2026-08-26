@@ -2,9 +2,12 @@
 -- Rodar em: Supabase → SQL Editor → New query → Run
 --
 -- Modelo de acesso:
---   • visitante anônimo        → lê apenas projetos com active = true
+--   • visitante anônimo        → lê projetos com active = true; escreve leads
 --   • usuário autenticado      → nada além disso, por padrão
 --   • usuário em public.admins → lê tudo, cria, edita e apaga
+--
+-- `leads` é o caso invertido: o anônimo escreve (preenche o formulário) mas
+-- nunca lê, porque são dados de contato de terceiros.
 --
 -- "Autenticado" NÃO é o mesmo que "administrador": enquanto o cadastro público
 -- estiver aberto no projeto, qualquer pessoa consegue uma sessão válida. Por
@@ -148,3 +151,58 @@ create policy "portfolio_admin_delete"
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'portfolio' and public.is_admin());
+
+-- -------------------------------------------------------------- leads -------
+--
+-- Solicitações vindas do formulário de contato.
+--
+-- Modelo de acesso invertido em relação a `projects`: aqui o visitante anônimo
+-- ESCREVE (é ele quem preenche o formulário) mas NUNCA LÊ — dados de contato de
+-- terceiros não podem ficar expostos pela API pública. Só administradores leem.
+
+create table if not exists public.leads (
+  id           uuid primary key default gen_random_uuid(),
+  name         text        not null check (length(trim(name)) between 2 and 120),
+  email        text        not null check (length(trim(email)) between 5 and 160),
+  whatsapp     text        not null check (length(trim(whatsapp)) between 8 and 40),
+  project_type text        not null check (length(trim(project_type)) between 2 and 60),
+  message      text        not null check (length(trim(message)) between 10 and 4000),
+  -- Preenchido pelo site, útil para saber de qual campanha veio o lead.
+  source       text,
+  handled      boolean     not null default false,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists leads_created_idx on public.leads (created_at desc);
+
+alter table public.leads enable row level security;
+
+-- Qualquer visitante pode enviar o formulário. Os `check` de tamanho acima são
+-- a barreira contra payloads absurdos, já que essa política é aberta por
+-- necessidade — sem ela, ninguém conseguiria pedir orçamento.
+drop policy if exists "leads_public_insert" on public.leads;
+create policy "leads_public_insert"
+  on public.leads for insert
+  to anon, authenticated
+  with check (true);
+
+-- Leitura, edição e exclusão: só administradores. Sem política de SELECT para
+-- anon, a API devolve vazio mesmo com a chave pública em mãos.
+drop policy if exists "leads_admin_read" on public.leads;
+create policy "leads_admin_read"
+  on public.leads for select
+  to authenticated
+  using (public.is_admin());
+
+drop policy if exists "leads_admin_update" on public.leads;
+create policy "leads_admin_update"
+  on public.leads for update
+  to authenticated
+  using (public.is_admin())
+  with check (public.is_admin());
+
+drop policy if exists "leads_admin_delete" on public.leads;
+create policy "leads_admin_delete"
+  on public.leads for delete
+  to authenticated
+  using (public.is_admin());

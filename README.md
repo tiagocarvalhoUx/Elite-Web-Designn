@@ -71,16 +71,27 @@ estático de `src/data/portfolio.ts` — o mesmo vale se a API estiver fora do a
 
 ## Formulário de contato
 
-Sem configuração, o envio abre o cliente de e-mail do visitante com a
-solicitação já formatada. Para enviar via API, defina o endpoint:
+**Para onde vai a solicitação**, em ordem de precedência:
 
-```bash
-# .env.local
-VITE_CONTACT_ENDPOINT=https://api.exemplo.com/contato
-```
+1. **`VITE_CONTACT_ENDPOINT`**, se definida em `.env.local` — `POST` com
+   `{ name, email, whatsapp, projectType, message }`. Use para mandar direto a
+   um CRM ou automação.
+2. **Supabase** (padrão) — grava na tabela `leads` e aparece em `/admin` →
+   **Solicitações**.
+3. **`mailto:`** — último recurso, só quando não há banco configurado.
 
-O endpoint recebe `POST` com `{ name, email, whatsapp, projectType, message }`.
+> A tela de sucesso **só aparece quando a gravação confirma**. Antes disso o
+> formulário abria um `mailto:` e declarava "Solicitação registrada" logo em
+> seguida — mas `mailto:` não confirma nada: no celular frequentemente não abre
+> app nenhum, e mesmo abrindo a pessoa ainda precisa apertar "enviar". Leads
+> eram perdidos sem deixar rastro.
+
 Um honeypot (`company`) descarta envios automatizados antes da requisição.
+
+**Privacidade:** a política de RLS permite que qualquer visitante *escreva* um
+lead (é ele quem preenche o formulário) mas **nenhuma política de SELECT existe
+para anônimos** — os contatos não podem ser lidos de volta pela chave pública.
+Só administradores leem.
 
 ## Meta Pixel (Facebook/Instagram Ads)
 

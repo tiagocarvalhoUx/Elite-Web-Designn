@@ -1,6 +1,7 @@
 import { computed, reactive, ref } from 'vue'
 import { site } from '@/data/site'
 import { identify, track } from '@/lib/metaPixel'
+import { canStoreLeads, submitLead } from '@/data/leads'
 
 export interface ContactFields {
   name: string
@@ -19,8 +20,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
 const MIN_PHONE_DIGITS = 10
 
 /**
- * Endpoint opcional. Quando `VITE_CONTACT_ENDPOINT` não está definido, a solicitação
- * é entregue pelo cliente de e-mail do usuário — sem inventar uma API inexistente.
+ * Endpoint externo opcional, para quem quiser mandar o lead para um CRM ou
+ * automação própria. Tem precedência sobre o Supabase quando definido.
  */
 const ENDPOINT = import.meta.env['VITE_CONTACT_ENDPOINT'] as string | undefined
 
@@ -128,6 +129,17 @@ export function useContactForm() {
     status.value = 'submitting'
 
     try {
+      /*
+       * Ordem deliberada. Antes, sem VITE_CONTACT_ENDPOINT, o formulário abria
+       * um `mailto:` e declarava sucesso na sequência — mas `mailto:` não
+       * confirma nada: no celular muitas vezes não abre app nenhum, e mesmo
+       * abrindo a pessoa ainda precisa apertar "enviar". A tela dizia
+       * "Solicitação registrada" com o lead perdido no caminho.
+       *
+       * Agora o Supabase é o destino padrão e o sucesso só aparece quando a
+       * gravação confirma. O `mailto:` fica como último recurso, para o caso de
+       * o projeto rodar sem banco configurado.
+       */
       if (ENDPOINT) {
         const response = await fetch(ENDPOINT, {
           method: 'POST',
@@ -141,6 +153,14 @@ export function useContactForm() {
           }),
         })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      } else if (canStoreLeads) {
+        await submitLead({
+          name: fields.name,
+          email: fields.email,
+          whatsapp: fields.whatsapp,
+          projectType: fields.projectType,
+          message: fields.message,
+        })
       } else {
         const subject = `Nova solicitação — ${fields.projectType}`
         window.location.href = `mailto:${site.email}?subject=${encodeURIComponent(

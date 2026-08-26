@@ -12,9 +12,17 @@ import {
   uploadProjectImage,
   type AdminProject,
 } from '@/data/adminProjects'
+import {
+  leads,
+  leadsError,
+  leadsLoading,
+  loadLeads,
+  removeLead,
+  toggleLeadHandled,
+} from '@/data/adminLeads'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
-type Page = 'dashboard' | 'projects' | 'editor'
+type Page = 'dashboard' | 'projects' | 'leads' | 'editor'
 
 const session = ref<Session | null>(null)
 const isAuthenticated = computed(() => session.value !== null)
@@ -72,12 +80,17 @@ onMounted(async () => {
   const { data } = await supabase.auth.getSession()
   session.value = data.session
   authReady.value = true
-  if (session.value) await loadProjects()
+  if (session.value) await Promise.all([loadProjects(), loadLeads()])
 
   supabase.auth.onAuthStateChange((_event, next) => {
     session.value = next
-    if (next) void loadProjects()
-    else adminProjects.value = []
+    if (next) {
+      void loadProjects()
+      void loadLeads()
+    } else {
+      adminProjects.value = []
+      leads.value = []
+    }
   })
 })
 
@@ -240,6 +253,45 @@ async function submitProject(): Promise<void> {
   }
 }
 
+async function onToggleLead(id: string): Promise<void> {
+  try {
+    await toggleLeadHandled(id)
+  } catch (error) {
+    leadsError.value = error instanceof Error ? error.message : 'Falha ao atualizar o lead.'
+  }
+}
+
+async function onRemoveLead(lead: { id: string; name: string }): Promise<void> {
+  if (!confirm(`Excluir a solicitação de "${lead.name}"? Esta ação não pode ser desfeita.`)) return
+  try {
+    await removeLead(lead.id)
+  } catch (error) {
+    leadsError.value = error instanceof Error ? error.message : 'Falha ao excluir o lead.'
+  }
+}
+
+/** dd/mm/aaaa às hh:mm — formato lido sem esforço por quem atende o lead. */
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+/** Link de WhatsApp já com a saudação preenchida, para responder num clique. */
+function whatsappLink(lead: { whatsapp: string; name: string }): string {
+  const digits = lead.whatsapp.replace(/\D/g, '')
+  const e164 = digits.startsWith('55') ? digits : `55${digits}`
+  const text = `Olá, ${lead.name.split(' ')[0]}! Recebemos sua solicitação no site da Elite Web Designer.`
+  return `https://wa.me/${e164}?text=${encodeURIComponent(text)}`
+}
+
+/** Contador do menu: quantas solicitações ainda não foram atendidas. */
+const pendingLeads = computed(() => leads.value.filter((lead) => !lead.handled).length)
+
 async function onToggle(id: string): Promise<void> {
   try {
     await toggleAdminProject(id)
@@ -294,6 +346,10 @@ async function onRemove(project: AdminProject): Promise<void> {
       <nav class="mt-8 space-y-2">
         <button class="admin-nav" :class="{ 'is-active': page === 'dashboard' }" @click="page = 'dashboard'">Dashboard</button>
         <button class="admin-nav" :class="{ 'is-active': page === 'projects' }" @click="page = 'projects'">Projetos</button>
+        <button class="admin-nav" :class="{ 'is-active': page === 'leads' }" @click="page = 'leads'">
+          Solicitações
+          <span v-if="pendingLeads" class="admin-badge">{{ pendingLeads }}</span>
+        </button>
         <button class="admin-nav" :class="{ 'is-active': page === 'editor' }" @click="openEditor()">+ Novo projeto</button>
       </nav>
       <div class="mt-auto border-t border-gold-500/20 pt-5">
@@ -355,6 +411,60 @@ async function onRemove(project: AdminProject): Promise<void> {
         <div v-else class="mt-8 border border-dashed border-gold-500/25 py-20 text-center text-muted">Nenhum projeto encontrado.</div>
       </template>
 
+      <template v-else-if="page === 'leads'">
+        <div>
+          <p class="label-caps text-gold-400">Formulário de contato</p>
+          <h1 class="mt-2 text-4xl sm:text-5xl">Solicitações</h1>
+        </div>
+
+        <p v-if="leadsError" class="mt-6 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">{{ leadsError }}</p>
+        <p v-if="leadsLoading" class="mt-6 text-sm text-muted">Carregando solicitações…</p>
+
+        <section v-if="leads.length" class="mt-8 flex flex-col gap-4">
+          <!-- Não atendidas primeiro seria o ideal, mas a ordem cronológica
+               ajuda mais: quem chegou antes espera há mais tempo. -->
+          <article
+            v-for="lead in leads"
+            :key="lead.id"
+            class="border bg-ink-900 p-5"
+            :class="lead.handled ? 'border-gold-500/15 opacity-60' : 'border-gold-500/35'"
+          >
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 class="text-2xl">{{ lead.name }}</h2>
+                <p class="label-caps mt-1 text-gold-400">{{ lead.projectType }}</p>
+              </div>
+              <div class="text-right text-xs text-muted">
+                <p>{{ formatDate(lead.createdAt) }}</p>
+                <p class="mt-1" :class="lead.handled ? 'text-muted' : 'text-green-400'">
+                  {{ lead.handled ? '✓ Atendido' : '● Novo' }}
+                </p>
+              </div>
+            </div>
+
+            <p class="mt-4 border-y border-gold-500/15 py-4 text-sm leading-relaxed text-sand whitespace-pre-line">{{ lead.message }}</p>
+
+            <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              <a :href="`mailto:${lead.email}`" class="text-gold-300 hover:text-gold-200">{{ lead.email }}</a>
+              <a :href="whatsappLink(lead)" target="_blank" rel="noopener noreferrer" class="text-gold-300 hover:text-gold-200">
+                {{ lead.whatsapp }} — responder no WhatsApp ↗
+              </a>
+            </div>
+
+            <div class="mt-5 flex gap-4 border-t border-gold-500/15 pt-4">
+              <button class="text-sm text-sand" @click="onToggleLead(lead.id)">
+                {{ lead.handled ? 'Marcar como novo' : 'Marcar como atendido' }}
+              </button>
+              <button class="ml-auto text-sm text-red-400" @click="onRemoveLead(lead)">Excluir</button>
+            </div>
+          </article>
+        </section>
+
+        <div v-else-if="!leadsLoading" class="mt-8 border border-dashed border-gold-500/25 py-20 text-center text-muted">
+          Nenhuma solicitação recebida ainda.
+        </div>
+      </template>
+
       <template v-else>
         <button class="label-caps text-gold-400" @click="page = 'projects'">← Voltar</button>
         <h1 class="mt-4 text-4xl sm:text-5xl">{{ editingId ? 'Editar projeto' : 'Novo projeto' }}</h1>
@@ -373,6 +483,8 @@ async function onRemove(project: AdminProject): Promise<void> {
 <style scoped>
 .admin-nav { width: 100%; border: 1px solid transparent; padding: .8rem 1rem; text-align: left; font-size: .78rem; letter-spacing: .12em; text-transform: uppercase; transition: .2s; }
 .admin-nav:hover, .admin-nav.is-active { border-color: rgb(170 126 49 / .3); background: rgb(201 155 59 / .09); color: var(--color-gold-300); }
+/* Contador de solicitações não atendidas, para o menu não deixar lead esquecido. */
+.admin-badge { display: inline-grid; place-items: center; min-width: 1.4rem; height: 1.4rem; margin-left: .5rem; padding: 0 .35rem; border-radius: 999px; background: var(--color-gold-400); color: var(--color-ink-950); font-size: .68rem; font-weight: 600; letter-spacing: 0; }
 .admin-primary, .admin-secondary { border: 1px solid var(--color-gold-400); padding: .75rem 1.2rem; font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
 .admin-primary { background: var(--color-gold-400); color: var(--color-ink-950); }
 .admin-secondary { color: var(--color-gold-300); }
