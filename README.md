@@ -25,6 +25,7 @@ npm run fonts        # rebaixa as fontes do Google para public/fonts
 | Telefone, e-mail, WhatsApp, redes | `src/data/site.ts`            |
 | Itens do menu                     | `src/data/navigation.ts`      |
 | Os três pilares de serviço        | `src/data/services.ts`        |
+| Planos e preços                   | `src/data/plans.ts`           |
 | Projetos do portfólio             | `src/data/portfolio.ts`       |
 | Métricas                          | `src/data/stats.ts`           |
 | Colunas do rodapé                 | `src/data/footer.ts`          |
@@ -87,6 +88,12 @@ estático de `src/data/portfolio.ts` — o mesmo vale se a API estiver fora do a
 > eram perdidos sem deixar rastro.
 
 Um honeypot (`company`) descarta envios automatizados antes da requisição.
+
+**Vindo da seção de planos:** clicar em "Contratar" leva ao formulário já com o
+tipo de projeto selecionado e a mensagem escrita — o nome do plano, o valor e a
+lista completa de itens. O bloco do plano ocupa o começo da mensagem: trocar de
+plano substitui só esse trecho e preserva o que a pessoa tiver escrito abaixo
+dele. A caixa de texto cresce junto, para o texto caber na tela em vez de rolar.
 
 **Privacidade:** a política de RLS permite que qualquer visitante *escreva* um
 lead (é ele quem preenche o formulário) mas **nenhuma política de SELECT existe

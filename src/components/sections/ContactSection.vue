@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { site } from '@/data/site'
 import { projectTypes } from '@/data/projectTypes'
 import { useContactForm } from '@/composables/useContactForm'
@@ -9,6 +10,16 @@ import BaseButton from '@/components/ui/BaseButton.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
 
 const { fields, status, errorFor, touch, onWhatsappInput, submit } = useContactForm()
+
+/*
+ * A mensagem pode chegar pronta da seção de planos, com uma dezena de linhas.
+ * Numa caixa de altura fixa a pessoa veria só o começo do que está prestes a
+ * enviar. Contar as quebras de linha resolve sem medir o DOM — e continua
+ * valendo quando o formulário é remontado depois de um envio.
+ */
+const messageRows = computed(() =>
+  Math.min(16, Math.max(5, fields.message.split('\n').length + 1)),
+)
 
 const BASE =
   'w-full bg-transparent font-sans text-[1.05rem] text-ivory transition-colors duration-300 ease-luxe placeholder:text-muted/80 hover:border-gold-500/60 focus:border-gold-300 focus:outline-none aria-invalid:border-[#e0a04a] lg:text-[0.95rem] lg:placeholder:text-muted/70'
@@ -150,7 +161,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
                     :id="slot.id"
                     v-model="fields.message"
                     name="message"
-                    rows="5"
+                    :rows="messageRows"
                     placeholder="Conte-nos sobre seu projeto…"
                     :class="BOX"
                     :aria-invalid="slot.invalid"

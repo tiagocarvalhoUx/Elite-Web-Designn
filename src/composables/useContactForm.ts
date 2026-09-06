@@ -1,7 +1,8 @@
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { site } from '@/data/site'
 import { identify, track } from '@/lib/metaPixel'
 import { canStoreLeads, submitLead } from '@/data/leads'
+import { planMessage, usePlanIntent } from '@/composables/usePlanIntent'
 
 export interface ContactFields {
   name: string
@@ -60,6 +61,42 @@ export function useContactForm() {
   const status = ref<FormStatus>('idle')
   const submitAttempted = ref(false)
 
+  /*
+   * Bloco de texto e tipo de projeto que este mecanismo escreveu por último.
+   * Guardá-los é o que permite trocar de plano sem apagar nada: o bloco do
+   * plano ocupa sempre o começo da mensagem, e o que a pessoa escreveu embaixo
+   * dele continua onde estava.
+   */
+  let autoMessage = ''
+  let autoType = ''
+
+  watch(usePlanIntent(), (intent) => {
+    if (!intent) return
+    const { plan } = intent
+
+    const block = planMessage(plan)
+    // Ou o bloco anterior é trocado no lugar, ou o novo entra por cima do que
+    // já havia — nunca por cima do texto de quem está escrevendo.
+    const rest =
+      autoMessage && fields.message.startsWith(autoMessage)
+        ? fields.message.slice(autoMessage.length)
+        : fields.message.trim()
+          ? `\n\n${fields.message}`
+          : ''
+
+    autoMessage = block
+    fields.message = block + rest
+
+    if (!fields.projectType || fields.projectType === autoType) {
+      autoType = plan.projectType
+      fields.projectType = autoType
+    }
+
+    // Quem já enviou uma vez e volta para escolher um plano precisa do
+    // formulário de volta — não do cartão de "solicitação registrada".
+    if (status.value === 'success' || status.value === 'error') status.value = 'idle'
+  })
+
   const errors = computed<Partial<Record<FieldName, string>>>(() => {
     const next: Partial<Record<FieldName, string>> = {}
 
@@ -110,6 +147,8 @@ export function useContactForm() {
     })
     ;(Object.keys(touched) as FieldName[]).forEach((key) => (touched[key] = false))
     submitAttempted.value = false
+    autoMessage = ''
+    autoType = ''
   }
 
   async function submit(): Promise<void> {
