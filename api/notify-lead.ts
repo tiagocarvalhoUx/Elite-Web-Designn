@@ -19,6 +19,7 @@ interface LeadPayload {
   whatsapp?: unknown
   projectType?: unknown
   message?: unknown
+  plan?: unknown
   source?: unknown
 }
 
@@ -69,6 +70,7 @@ export default async function handler(request: Request): Promise<Response> {
   const whatsapp = str(payload.whatsapp, 40)
   const projectType = str(payload.projectType, 60)
   const message = str(payload.message, 4000)
+  const plan = str(payload.plan, 60)
   const source = str(payload.source, 300)
 
   if (!name || !email || !message) {
@@ -76,6 +78,7 @@ export default async function handler(request: Request): Promise<Response> {
   }
 
   const rows: Array<[string, string]> = [
+    ...(plan ? ([['Plano', `<strong>${escapeHtml(plan)}</strong>`]] as Array<[string, string]>) : []),
     ['Nome', escapeHtml(name)],
     ['E-mail', `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`],
     [
@@ -116,7 +119,14 @@ export default async function handler(request: Request): Promise<Response> {
       to: [to],
       // Responder o e-mail vai direto para o cliente, sem copiar endereço.
       reply_to: email,
-      subject: `Nova solicitação — ${projectType || 'Orçamento'} — ${name}`,
+      /*
+       * O plano vem primeiro por causa da notificação do celular: o texto é
+       * cortado depois de poucas palavras, e é ele que decide se vale
+       * interromper o que se está fazendo para responder agora.
+       */
+      subject: plan
+        ? `Nova solicitação — Plano ${plan} — ${name}`
+        : `Nova solicitação — ${projectType || 'Orçamento'} — ${name}`,
       html,
     }),
   })

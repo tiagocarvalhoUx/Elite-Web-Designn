@@ -70,7 +70,20 @@ export function useContactForm() {
   let autoMessage = ''
   let autoType = ''
 
-  watch(usePlanIntent(), (intent) => {
+  const planIntent = usePlanIntent()
+
+  /**
+   * Plano a anunciar no assunto do aviso — e é por isso que ele depende do
+   * texto ainda começar pelo bloco gerado. Quem escolheu um plano e depois
+   * reescreveu a mensagem inteira não está mais falando daquele plano, e um
+   * assunto afirmando o contrário levaria a conversa para o lugar errado.
+   */
+  function chosenPlan(): string | undefined {
+    if (!autoMessage || !fields.message.startsWith(autoMessage)) return undefined
+    return planIntent.value?.plan.name
+  }
+
+  watch(planIntent, (intent) => {
     if (!intent) return
     const { plan } = intent
 
@@ -189,6 +202,7 @@ export function useContactForm() {
             whatsapp: fields.whatsapp.trim(),
             projectType: fields.projectType,
             message: fields.message.trim(),
+            plan: chosenPlan(),
           }),
         })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
@@ -199,6 +213,7 @@ export function useContactForm() {
           whatsapp: fields.whatsapp,
           projectType: fields.projectType,
           message: fields.message,
+          ...(chosenPlan() ? { plan: chosenPlan() as string } : {}),
         })
       } else {
         const subject = `Nova solicitação — ${fields.projectType}`

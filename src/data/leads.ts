@@ -21,6 +21,12 @@ export interface LeadInput {
   whatsapp: string
   projectType: string
   message: string
+  /**
+   * Plano escolhido, quando veio pela seção de planos. Só viaja no aviso por
+   * e-mail, para aparecer no assunto — a tabela não tem coluna para ele, e o
+   * nome do plano já está escrito dentro da própria mensagem.
+   */
+  plan?: string
 }
 
 /**
@@ -75,6 +81,7 @@ async function notifyByEmail(input: LeadInput): Promise<void> {
         whatsapp: input.whatsapp.trim(),
         projectType: input.projectType,
         message: input.message.trim(),
+        plan: input.plan ?? '',
         source: typeof window === 'undefined' ? '' : window.location.href,
       }),
     })
