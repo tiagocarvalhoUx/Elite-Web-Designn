@@ -9,5 +9,6 @@ export const primaryNav: readonly NavItem[] = [
   { id: 'inicio', label: 'Início', href: '#inicio' },
   { id: 'servicos', label: 'Serviços', href: '#servicos' },
   { id: 'projetos', label: 'Projetos', href: '#projetos' },
+  { id: 'planos', label: 'Planos', href: '#planos' },
   { id: 'contato', label: 'Contato', href: '#contato' },
 ]

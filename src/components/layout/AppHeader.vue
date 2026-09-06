@@ -32,7 +32,7 @@ const menuOpen = ref(false)
       </a>
 
       <nav class="hidden lg:block" aria-label="Principal">
-        <ul class="flex items-center gap-9">
+        <ul class="flex items-center gap-7 xl:gap-9">
           <li v-for="item in primaryNav" :key="item.id">
             <a
               :href="item.href"

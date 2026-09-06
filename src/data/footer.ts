@@ -31,6 +31,7 @@ export const footerColumns: readonly FooterColumn[] = [
       { id: 'sites', label: 'Sites institucionais', href: '#servicos' },
       { id: 'ecommerce', label: 'E-commerce', href: '#servicos' },
       { id: 'apps', label: 'Aplicativos', href: '#servicos' },
+      { id: 'planos', label: 'Planos e valores', href: '#planos' },
       { id: 'suporte', label: 'Manutenção e suporte', href: '#contato' },
     ],
   },
