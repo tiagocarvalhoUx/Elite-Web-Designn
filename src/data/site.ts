@@ -18,6 +18,19 @@ const WHATSAPP_E164 = '5518981142927'
 export const WHATSAPP_MESSAGE =
   'Olá! Vim pelo site da Elite Web Designer e gostaria de solicitar uma proposta.'
 
+/**
+ * Link do WhatsApp com a mensagem já escrita.
+ *
+ * É o que permite a conversa nascer com contexto: a primeira mensagem que
+ * chega diz qual plano a pessoa escolheu, em vez de um "olá" solto que obriga
+ * a perguntar tudo de novo. Como quem envia é o cliente, a conversa fica
+ * aberta dos dois lados sem depender de API, número dedicado ou aprovação de
+ * modelo pela Meta.
+ */
+export function whatsappUrlWith(message: string): string {
+  return `https://wa.me/${WHATSAPP_E164}?text=${encodeURIComponent(message)}`
+}
+
 export const site = {
   name: 'Elite Web Designer',
   tagline: 'Presença digital de excelência',
@@ -25,7 +38,7 @@ export const site = {
   locationShort: 'Araçatuba — Brasil',
   email: 'eliteprimestoreselite@gmail.com',
   phoneDisplay: '(18) 98114-2927',
-  whatsappUrl: `https://wa.me/${WHATSAPP_E164}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`,
+  whatsappUrl: whatsappUrlWith(WHATSAPP_MESSAGE),
   foundedYear: 2024,
 } as const
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { plans } from '@/data/plans'
-import { choosePlan } from '@/composables/usePlanIntent'
+import { whatsappUrlWith } from '@/data/site'
+import { choosePlan, planMessage } from '@/composables/usePlanIntent'
 import SiteContainer from '@/components/ui/SiteContainer.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import AppIcon from '@/components/ui/AppIcon.vue'
@@ -128,6 +129,23 @@ import AppIcon from '@/components/ui/AppIcon.vue'
               >
                 Contratar
               </BaseButton>
+
+              <!--
+                Segundo caminho, deliberadamente discreto: o formulário grava o
+                lead no banco e é o destino principal. Quem prefere falar agora
+                abre o WhatsApp com o plano já escrito — a conversa chega
+                iniciada pelo cliente, com o contexto dentro.
+              -->
+              <a
+                :href="whatsappUrlWith(planMessage(plan))"
+                target="_blank"
+                rel="noopener noreferrer"
+                :aria-label="`Falar no WhatsApp sobre o plano ${plan.name}`"
+                class="mt-4 flex items-center justify-center gap-2 text-[0.68rem] font-medium tracking-luxe text-muted uppercase transition-colors duration-300 ease-luxe hover:text-gold-300"
+              >
+                <AppIcon name="whatsapp" :size="14" />
+                Falar no WhatsApp
+              </a>
             </div>
           </article>
         </li>

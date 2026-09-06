@@ -95,6 +95,12 @@ lista completa de itens. O bloco do plano ocupa o começo da mensagem: trocar de
 plano substitui só esse trecho e preserva o que a pessoa tiver escrito abaixo
 dele. A caixa de texto cresce junto, para o texto caber na tela em vez de rolar.
 
+Cada plano tem também um **"Falar no WhatsApp"** discreto abaixo do botão, que
+abre a conversa com a mesma mensagem já escrita. É a via para quem não quer
+preencher formulário: a conversa chega iniciada pelo cliente, com o plano
+dentro, e não depende de API, número dedicado nem aprovação de modelo pela
+Meta. O lead, nesse caminho, não passa pelo banco — existe só no WhatsApp.
+
 **Privacidade:** a política de RLS permite que qualquer visitante *escreva* um
 lead (é ele quem preenche o formulário) mas **nenhuma política de SELECT existe
 para anônimos** — os contatos não podem ser lidos de volta pela chave pública.

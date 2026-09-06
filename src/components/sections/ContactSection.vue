@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { site } from '@/data/site'
+import { site, whatsappUrlWith } from '@/data/site'
+import { planMessage, usePlanIntent } from '@/composables/usePlanIntent'
 import { projectTypes } from '@/data/projectTypes'
 import { useContactForm } from '@/composables/useContactForm'
 import SectionHeading from '@/components/ui/SectionHeading.vue'
@@ -19,6 +20,16 @@ const { fields, status, errorFor, touch, onWhatsappInput, submit } = useContactF
  */
 const messageRows = computed(() =>
   Math.min(16, Math.max(5, fields.message.split('\n').length + 1)),
+)
+
+/*
+ * Na tela de sucesso, o botão de WhatsApp leva junto o plano escolhido. Quem
+ * acabou de pedir orçamento do Premium e resolve falar agora não deveria
+ * chegar com um "olá" solto, obrigando a repetir tudo que já preencheu.
+ */
+const planIntent = usePlanIntent()
+const successWhatsapp = computed(() =>
+  planIntent.value ? whatsappUrlWith(planMessage(planIntent.value.plan)) : site.whatsappUrl,
 )
 
 const BASE =
@@ -59,7 +70,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
             <p class="max-w-[46ch] text-sm text-muted">
               Respondemos em até um dia útil. Se preferir falar agora, chame no WhatsApp.
             </p>
-            <BaseButton :href="site.whatsappUrl" variant="outline" external>
+            <BaseButton :href="successWhatsapp" variant="outline" external>
               Falar no WhatsApp
             </BaseButton>
           </div>
