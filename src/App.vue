@@ -6,6 +6,7 @@ import { useMotion } from '@/composables/useMotion'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppFooter from '@/components/layout/AppFooter.vue'
 import WhatsAppFab from '@/components/layout/WhatsAppFab.vue'
+import GoldCursor from '@/components/layout/GoldCursor.vue'
 import HomeView from '@/views/HomeView.vue'
 
 // O painel (e o SDK do Supabase junto) só é baixado ao acessar /admin.
@@ -35,5 +36,7 @@ useMotion()
 
   <AppFooter />
   <WhatsAppFab />
+  <!-- Só no site público: o painel /admin é ferramenta de trabalho e mantém o cursor do sistema. -->
+  <GoldCursor />
   </template>
 </template>

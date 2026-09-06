@@ -115,6 +115,24 @@
   :focus:not(:focus-visible) {
     outline: none;
   }
+
+  /*
+   * Cursor próprio (GoldCursor.vue). A classe é aposta pelo JS só quando o
+   * canvas está de fato desenhando — escrever `cursor: none` direto aqui
+   * deixaria a página sem cursor nenhum se o script falhasse.
+   */
+  html.gold-cursor,
+  html.gold-cursor * {
+    cursor: none;
+  }
+
+  /*
+   * Campos de texto mantêm o cursor do sistema: o I-beam diz onde a letra vai
+   * entrar e a que altura está a linha — nenhum ponto desenhado substitui isso.
+   */
+  html.gold-cursor :is(input, textarea, select, [contenteditable]) {
+    cursor: auto;
+  }
 }
 
 /* ==========================================================================
