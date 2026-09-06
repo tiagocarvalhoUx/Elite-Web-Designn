@@ -177,6 +177,13 @@ create index if not exists leads_created_idx on public.leads (created_at desc);
 
 alter table public.leads enable row level security;
 
+-- O PostgREST exige privilégios de tabela além das políticas de RLS. O visitante
+-- pode apenas inserir; usuários autenticados recebem os privilégios necessários,
+-- mas as políticas abaixo continuam restringindo leitura e gestão a admins.
+grant usage on schema public to anon, authenticated;
+grant insert on table public.leads to anon, authenticated;
+grant select, update, delete on table public.leads to authenticated;
+
 -- Qualquer visitante pode enviar o formulário. Os `check` de tamanho acima são
 -- a barreira contra payloads absurdos, já que essa política é aberta por
 -- necessidade — sem ela, ninguém conseguiria pedir orçamento.
@@ -206,3 +213,6 @@ create policy "leads_admin_delete"
   on public.leads for delete
   to authenticated
   using (public.is_admin());
+
+-- Faz a API REST reconhecer imediatamente tabelas e permissões recém-criadas.
+notify pgrst, 'reload schema';
