@@ -161,8 +161,22 @@ export default async function handler(request: Request): Promise<Response> {
     }),
   })
 
+  const detail = await response.text().catch(() => '')
+
+  /*
+   * Registro de diagnóstico nos logs da Vercel.
+   *
+   * O aviso é best-effort e falha em silêncio de propósito — o que é certo
+   * para o cliente, que não deve ver um erro por algo que não é problema dele,
+   * mas deixa quem mantém o site sem nenhuma pista quando o e-mail não chega.
+   * Estas duas linhas são a pista: destino, status do Resend e o id da
+   * mensagem, que é o que permite achá-la no painel do Resend.
+   */
+  console.log(
+    `[notify-lead] to=${to} status=${response.status} resposta=${detail.slice(0, 200)}`,
+  )
+
   if (!response.ok) {
-    const detail = await response.text().catch(() => '')
     return new Response(`Falha ao enviar o aviso: ${detail}`.slice(0, 300), { status: 502 })
   }
 
