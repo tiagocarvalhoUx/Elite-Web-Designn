@@ -108,6 +108,27 @@ export default async function handler(request: Request): Promise<Response> {
       ${source ? `<p style="margin:24px 0 0;font-size:12px;color:#9c9182">Origem: ${escapeHtml(source)}</p>` : ''}
     </div>`
 
+  /*
+   * Versão em texto puro. Não é enfeite: mensagem só-HTML é um dos sinais que
+   * mais pesam contra num filtro de spam, porque quase toda correspondência
+   * legítima traz as duas partes. Também é o que aparece na pré-visualização
+   * da notificação do celular.
+   */
+  const text = [
+    'Nova solicitação de orçamento — Elite Web Designer',
+    '',
+    ...(plan ? [`Plano: ${plan}`] : []),
+    `Nome: ${name}`,
+    `E-mail: ${email}`,
+    `WhatsApp: ${whatsapp}`,
+    `Responder no WhatsApp: ${whatsappLink(whatsapp, name)}`,
+    `Tipo de projeto: ${projectType}`,
+    '',
+    'Mensagem:',
+    message,
+    ...(source ? ['', `Origem: ${source}`] : []),
+  ].join('\n')
+
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -128,6 +149,15 @@ export default async function handler(request: Request): Promise<Response> {
         ? `Nova solicitação — Plano ${plan} — ${name}`
         : `Nova solicitação — ${projectType || 'Orçamento'} — ${name}`,
       html,
+      text,
+      /*
+       * Sem um identificador único, o Gmail agrupa os avisos numa conversa só:
+       * assunto parecido, mesmo remetente. As solicitações novas entram
+       * recolhidas dentro de uma conversa já lida — e conversa já lida não
+       * gera notificação. Este cabeçalho é o que a Resend documenta para
+       * quebrar esse agrupamento; cada aviso passa a ser um e-mail próprio.
+       */
+      headers: { 'X-Entity-Ref-ID': crypto.randomUUID() },
     }),
   })
 
