@@ -52,6 +52,24 @@ function siteUrlPlugin(siteUrl: string): Plugin {
 }
 
 /**
+ * Aquece a conexão com o Supabase (API e Storage) antes que o portfólio
+ * precise dela. Sem isto, a primeira imagem só começa a baixar depois de DNS
+ * + TLS de um domínio novo — um atraso pago bem no meio da navegação, para
+ * quem chega até a seção de projetos. Some quando não há Supabase nesta build.
+ */
+function supabasePreconnectPlugin(url: string | undefined): Plugin {
+  return {
+    name: 'supabase-preconnect',
+    transformIndexHtml: (html) => {
+      const block = /<!--SUPABASE_PRECONNECT_START-->[\s\S]*?<!--SUPABASE_PRECONNECT_END-->/
+      if (!url) return html.replace(block, '')
+      const origin = new URL(url).origin
+      return html.replaceAll('%SUPABASE_ORIGIN%', origin)
+    },
+  }
+}
+
+/**
  * Preenche o pixel de imagem do noscript com o ID configurado, ou remove o
  * bloco inteiro quando não há Meta Pixel nesta build — HTML nunca aponta para
  * um `id=` vazio.
@@ -79,6 +97,7 @@ export default defineConfig(({ mode }) => {
       vue(),
       tailwindcss(),
       siteUrlPlugin(resolveSiteUrl(env)),
+      supabasePreconnectPlugin(env['VITE_SUPABASE_URL']),
       metaPixelNoscriptPlugin(env['VITE_META_PIXEL_ID']),
     ],
     resolve: {

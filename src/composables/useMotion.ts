@@ -158,27 +158,6 @@ type Trigger = (typeof import('gsap/ScrollTrigger'))['ScrollTrigger']
 function choreograph(gsap: Gsap, ScrollTrigger: Trigger): { register: Register; dispose: () => void } {
   const context = gsap.context(() => {})
 
-  function animateIntro(elements: HTMLElement[]): void {
-    const timeline = gsap.timeline({ defaults: { ease: 'power3.out', duration: 1.05 }, delay: 0.15 })
-    timeline.to(elements, { opacity: 1, y: 0, stagger: 0.11 })
-
-    const stage = document.querySelector<HTMLElement>('.hero__stage')
-    if (stage) {
-      timeline.fromTo(stage, { scale: 0.965 }, { scale: 1, duration: 1.5, ease: 'power2.out' }, '<0.15')
-    }
-
-    // O feixe de luz entra uma única vez — sem laço contínuo no fundo.
-    const beam = document.querySelector<HTMLElement>('.hero__light')
-    if (beam) {
-      timeline.fromTo(
-        beam,
-        { opacity: 0, xPercent: -12 },
-        { opacity: 1, xPercent: 0, duration: 2.2, ease: 'power1.out' },
-        0,
-      )
-    }
-  }
-
   function animateOnScroll(elements: HTMLElement[]): void {
     // Um lote por variante: o ScrollTrigger escalona dentro do grupo, e
     // misturar direções no mesmo lote produziria um vaivém sem sentido.
@@ -246,11 +225,7 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): { register: Register; 
       for (const el of elements) gsap.set(el, VARIANTS[variantOf(el)])
       revealNow(elements)
 
-      const hero = elements.filter((el) => el.closest('#inicio'))
-      const rest = elements.filter((el) => !hero.includes(el))
-
-      if (hero.length) animateIntro(hero)
-      if (rest.length) animateOnScroll(rest)
+      animateOnScroll(elements)
       animateCounters(elements)
     })
   }

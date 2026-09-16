@@ -23,12 +23,11 @@ const heroWhatsappUrl = whatsappUrlWith(
 
     <SiteContainer as="div" class="relative z-10 py-28 lg:py-24">
       <div class="flex flex-col items-center text-center">
-        <p data-reveal class="label-caps text-gold-400">{{ site.locationShort }}</p>
+        <p class="hero-in label-caps text-gold-400">{{ site.locationShort }}</p>
 
         <h1
-          data-reveal
           style="--reveal-delay: 90ms"
-          class="display-caps mt-5 text-[clamp(2.15rem,8vw,5.6rem)] leading-[.92] text-ivory"
+          class="hero-in display-caps mt-5 text-[clamp(2.15rem,8vw,5.6rem)] leading-[.92] text-ivory"
         >
           <span class="block">Presença digital</span>
           <span class="block">
@@ -40,24 +39,21 @@ const heroWhatsappUrl = whatsappUrlWith(
         </h1>
 
         <GoldDivider
-          data-reveal
           style="--reveal-delay: 160ms"
-          class="mt-6"
+          class="hero-in mt-6"
           :width="320"
         />
 
         <p
-          data-reveal
           style="--reveal-delay: 200ms"
-          class="mt-5 max-w-[38ch] font-display text-[clamp(1.1rem,2.1vw,1.45rem)] leading-relaxed text-balance text-sand"
+          class="hero-in mt-5 max-w-[38ch] font-display text-[clamp(1.1rem,2.1vw,1.45rem)] leading-relaxed text-balance text-sand"
         >
           Sites, lojas e aplicações desenvolvidos sob medida para marcas exigentes.
         </p>
 
         <div
-          data-reveal
           style="--reveal-delay: 260ms"
-          class="mt-7 flex flex-col items-center gap-5 sm:flex-row sm:gap-14"
+          class="hero-in mt-7 flex flex-col items-center gap-5 sm:flex-row sm:gap-14"
         >
           <BaseButton
             :href="heroWhatsappUrl"
@@ -81,6 +77,30 @@ const heroWhatsappUrl = whatsappUrlWith(
 </template>
 
 <style scoped>
+/*
+ * A primeira dobra nunca pode depender do chunk do GSAP para aparecer: o
+ * resto do site usa `[data-reveal]` (oculto até o JS de scroll assumir), mas
+ * aqui a entrada roda só em CSS, disparada pela própria pintura da página.
+ * Sem isso, numa rede lenta o título ficava invisível por até ~3s enquanto o
+ * bundle de animação baixava — o pior tipo de lentidão, na primeira coisa que
+ * o visitante vê.
+ */
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-in {
+  animation: hero-in 0.7s var(--ease-luxe) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
 /*
  * A cena do escritório é a arte inteira — mesa de mármore, estação de
  * trabalho e a cidade à noite pela janela. Ela substitui o mockup de

@@ -55,6 +55,24 @@ function leadLine(description: string): string {
   return description.split('\n')[0] ?? description
 }
 
+/**
+ * Todas as folhas ocupam o mesmo retângulo (`inset: 0`), empilhadas por
+ * z-index — geometricamente todas "estão" na tela desde o primeiro quadro.
+ * `loading="lazy"` decide pela distância até o viewport, então não adianta
+ * nada aqui: o navegador baixaria o catálogo inteiro de uma vez, disputando
+ * banda com o vídeo e as fontes logo na carga da página. Em vez disso, cada
+ * folha só ganha `src` quando está perto da vez — a folha atual e as duas
+ * seguintes — e permanece carregada depois, sem descarregar ao passar.
+ *
+ * Com `prefers-reduced-motion` o pin nunca roda (`active` não avança) e a
+ * pilha vira uma grade normal, onde `loading="lazy"` do navegador já resolve
+ * tudo sozinho — por isso a janela por índice não se aplica a esse caso.
+ */
+const LOOKAHEAD = 2
+function shouldLoad(index: number): boolean {
+  return prefersReducedMotion || index <= active.value + LOOKAHEAD
+}
+
 onMounted(async () => {
   if (!section.value) return
   try {
@@ -177,7 +195,13 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
             @click="emit('open', project)"
           >
             <div class="portfolio-media">
-              <img :src="project.src" alt="" :loading="index === 0 ? 'eager' : 'lazy'" decoding="async" />
+              <img
+                v-if="shouldLoad(index)"
+                :src="project.src"
+                alt=""
+                :loading="index === 0 ? 'eager' : 'lazy'"
+                decoding="async"
+              />
             </div>
             <div class="portfolio-page-dim" />
             <!-- Gradiente próprio, não `::after`: esse pseudo-elemento já é o filete dourado do `gold-trace`. -->
@@ -439,7 +463,7 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
     transform: none !important;
     justify-self: center;
   }
-  .portfolio-sheet-panel { transform: none !important; pointer-events: auto; }
+  .portfolio-sheet-panel { transform: none !important; opacity: 1 !important; pointer-events: auto; }
   .portfolio-page-dim { display: none; }
   .portfolio-status { display: none; }
 }
