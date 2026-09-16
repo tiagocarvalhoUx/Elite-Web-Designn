@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import { site } from '@/data/site'
+import { site, whatsappUrlWith } from '@/data/site'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import GoldDivider from '@/components/ui/GoldDivider.vue'
 import SiteContainer from '@/components/ui/SiteContainer.vue'
+
+/**
+ * Escrita como se fosse o visitante falando: dá contexto (veio do site, viu
+ * a proposta visual) e já sinaliza intenção de orçamento — a mensagem que
+ * chega não é um "oi" solto, é alguém pronto pra conversar sobre um projeto.
+ */
+const heroWhatsappUrl = whatsappUrlWith(
+  'Olá! Acabei de ver o site da Elite Web Designer e adorei a proposta visual. ' +
+  'Quero saber mais sobre como vocês podem criar uma presença digital assim para a minha marca — podemos conversar sobre uma proposta?',
+)
 </script>
 
 <template>
@@ -50,9 +60,10 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
           class="mt-7 flex flex-col items-center gap-5 sm:flex-row sm:gap-14"
         >
           <BaseButton
-            href="#contato"
+            :href="heroWhatsappUrl"
             variant="solid"
             size="lg"
+            external
             pixel-event="CliqueOrcamento"
             pixel-label="Solicitar proposta (hero)"
           >
