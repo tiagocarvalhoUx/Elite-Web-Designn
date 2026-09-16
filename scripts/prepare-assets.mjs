@@ -57,6 +57,43 @@ async function hero() {
   console.log('hero: laptop-mrv')
 }
 
+/**
+ * Fundo do Hero: a cena de escritório (mesa de mármore, monitor, skyline) que
+ * substitui o mockup do laptop — a arte já é a composição inteira, sem device
+ * a montar por cima.
+ */
+async function heroOffice() {
+  await mkdir(path.join(OUT, 'hero'), { recursive: true })
+  const src = path.join(PACK, '03_HERO', 'hero-office-desk.jpg')
+  await sharp(src).webp({ quality: 84, effort: 6 }).toFile(path.join(OUT, 'hero', 'office-desk.webp'))
+  // Variante mais leve para o breakpoint mobile do CSS do Hero.
+  await sharp(src)
+    .resize({ width: 900, kernel: 'lanczos3' })
+    .webp({ quality: 78, effort: 6 })
+    .toFile(path.join(OUT, 'hero', 'office-desk-mobile.webp'))
+  console.log('hero: office-desk')
+}
+
+/**
+ * Recortes de dispositivo do carrossel "O Ecossistema Elite" — a arte já vem
+ * com o fundo removido (RGBA); convertida para WebP preservando o alfa, e sem
+ * redimensionar (as silhuetas do DeviceCutout.vue foram traçadas nestas
+ * dimensões exatas).
+ */
+async function ecosystem() {
+  await mkdir(path.join(OUT, 'editorial'), { recursive: true })
+  const cutouts = ['desktop', 'notebook', 'tablet', 'smartphone']
+  for (const id of cutouts) {
+    await sharp(path.join(PACK, '07_ECOSYSTEM', `device-${id}.png`))
+      .webp({ quality: 90, effort: 6, alphaQuality: 95 })
+      .toFile(path.join(OUT, 'editorial', `device-${id}.webp`))
+  }
+  await sharp(path.join(PACK, '07_ECOSYSTEM', 'ecosystem-stage-bg.webp'))
+    .webp({ quality: 82, effort: 6 })
+    .toFile(path.join(OUT, 'editorial', 'ecosystem-stage-bg.webp'))
+  console.log('ecosystem: 4 device cutouts + stage bg')
+}
+
 async function brand() {
   await mkdir(path.join(OUT, 'brand'), { recursive: true })
   const mark = path.join(PACK, '01_BRAND', 'logo-wd-gold-transparent.png')
@@ -172,6 +209,8 @@ async function metaImages() {
 
 await portfolio()
 await hero()
+await heroOffice()
+await ecosystem()
 await marble()
 await brand()
 await metaImages()

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import HeroSection from '@/components/sections/HeroSection.vue'
+import EcosystemSection from '@/components/sections/EcosystemSection.vue'
 import ServicesSection from '@/components/sections/ServicesSection.vue'
 import PortfolioSection from '@/components/sections/PortfolioSection.vue'
 import BrandStatementSection from '@/components/sections/BrandStatementSection.vue'
@@ -12,6 +13,7 @@ import ContactSection from '@/components/sections/ContactSection.vue'
 <template>
   <!-- Ordem pensada para conversão: promessa → serviços → prova → autoridade → preço → contato. -->
   <HeroSection />
+  <EcosystemSection />
   <ServicesSection />
   <PortfolioSection />
   <BrandStatementSection />
