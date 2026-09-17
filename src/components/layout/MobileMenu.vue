@@ -67,7 +67,7 @@ function onKeydown(event: KeyboardEvent): void {
           <GoldDivider :width="200" />
           <BaseButton
             href="#contato"
-            variant="solid"
+            variant="outline"
             size="lg"
             pixel-event="CliqueOrcamento"
             pixel-label="Pedir orçamento (menu mobile)"
@@ -75,15 +75,15 @@ function onKeydown(event: KeyboardEvent): void {
           >
             Pedir orçamento
           </BaseButton>
-          <a
+          <BaseButton
             :href="site.whatsappUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-3 text-sm text-sand transition-colors duration-200 hover:text-gold-200"
+            variant="solid"
+            size="lg"
+            external
           >
             <AppIcon name="whatsapp" :size="18" />
-            {{ site.phoneDisplay }}
-          </a>
+            Falar no WhatsApp
+          </BaseButton>
         </div>
       </nav>
     </div>

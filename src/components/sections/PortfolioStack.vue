@@ -337,7 +337,7 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  border: 1px solid rgb(232 200 116 / 0.2);
+  border: 1px solid rgb(232 200 116 / 0.42);
   border-radius: clamp(12px, 1.5vw, 24px);
   background: var(--color-ink-700);
   box-shadow: 0 -18px 38px rgb(0 0 0 / 0.34), 0 40px 90px rgb(0 0 0 / 0.62);

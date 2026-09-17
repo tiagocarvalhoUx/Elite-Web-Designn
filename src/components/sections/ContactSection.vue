@@ -13,16 +13,6 @@ import AppIcon from '@/components/ui/AppIcon.vue'
 const { fields, status, errorFor, touch, onWhatsappInput, submit } = useContactForm()
 
 /*
- * A mensagem pode chegar pronta da seção de planos, com uma dezena de linhas.
- * Numa caixa de altura fixa a pessoa veria só o começo do que está prestes a
- * enviar. Contar as quebras de linha resolve sem medir o DOM — e continua
- * valendo quando o formulário é remontado depois de um envio.
- */
-const messageRows = computed(() =>
-  Math.min(16, Math.max(5, fields.message.split('\n').length + 1)),
-)
-
-/*
  * Na tela de sucesso, o botão de WhatsApp leva junto o plano escolhido. Quem
  * acabou de pedir orçamento do Premium e resolve falar agora não deveria
  * chegar com um "olá" solto, obrigando a repetir tudo que já preencheu.
@@ -38,8 +28,6 @@ const BASE =
 /** Campo em filete, como na arte original. */
 const CONTROL = `${BASE} border-0 border-b border-gold-500/80 px-0 py-3.5 lg:border-gold-500/35 lg:py-3`
 
-/** Caixa fechada — só a mensagem, que precisa de área de escrita. */
-const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 leading-relaxed lg:border-gold-500/35 lg:py-3`
 </script>
 
 <template>
@@ -70,7 +58,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
             <p class="max-w-[46ch] text-sm text-muted">
               Respondemos em até um dia útil. Se preferir falar agora, chame no WhatsApp.
             </p>
-            <BaseButton :href="successWhatsapp" variant="outline" external>
+            <BaseButton :href="successWhatsapp" variant="solid" external>
               Falar no WhatsApp
             </BaseButton>
           </div>
@@ -78,10 +66,10 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
           <form v-else key="form" novalidate data-reveal @submit.prevent="submit">
             <!-- Honeypot: invisível para pessoas, atraente para bots. -->
             <div class="sr-only" aria-hidden="true">
-              <label for="company">Empresa</label>
+              <label for="website">Site</label>
               <input
-                id="company"
-                v-model="fields.company"
+                id="website"
+                v-model="fields.website"
                 type="text"
                 tabindex="-1"
                 autocomplete="off"
@@ -96,28 +84,13 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
                     v-model="fields.name"
                     type="text"
                     name="name"
+                    required
                     autocomplete="name"
                     placeholder="Seu nome completo"
                     :class="CONTROL"
                     :aria-invalid="slot.invalid"
                     :aria-describedby="slot.describedBy"
                     @blur="touch('name')"
-                  />
-                </FormField>
-
-                <FormField id="email" v-slot="slot" label="E-mail" :error="errorFor('email')">
-                  <input
-                    :id="slot.id"
-                    v-model="fields.email"
-                    type="email"
-                    name="email"
-                    autocomplete="email"
-                    inputmode="email"
-                    placeholder="seu@email.com"
-                    :class="CONTROL"
-                    :aria-invalid="slot.invalid"
-                    :aria-describedby="slot.describedBy"
-                    @blur="touch('email')"
                   />
                 </FormField>
 
@@ -132,6 +105,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
                     :value="fields.whatsapp"
                     type="tel"
                     name="whatsapp"
+                    required
                     autocomplete="tel-national"
                     inputmode="tel"
                     placeholder="(18) 99999-9999"
@@ -155,6 +129,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
                     :id="slot.id"
                     v-model="fields.projectType"
                     name="projectType"
+                    required
                     :class="[CONTROL, 'field-select cursor-pointer pr-8']"
                     :aria-invalid="slot.invalid"
                     :aria-describedby="slot.describedBy"
@@ -167,17 +142,15 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
                   </select>
                 </FormField>
 
-                <FormField id="mensagem" v-slot="slot" label="Mensagem" :error="errorFor('message')">
-                  <textarea
+                <FormField id="empresa" v-slot="slot" label="Empresa (opcional)">
+                  <input
                     :id="slot.id"
-                    v-model="fields.message"
-                    name="message"
-                    :rows="messageRows"
-                    placeholder="Conte-nos sobre seu projeto…"
-                    :class="BOX"
-                    :aria-invalid="slot.invalid"
-                    :aria-describedby="slot.describedBy"
-                    @blur="touch('message')"
+                    v-model="fields.company"
+                    type="text"
+                    name="company"
+                    autocomplete="organization"
+                    placeholder="Nome da sua empresa"
+                    :class="CONTROL"
                   />
                 </FormField>
               </div>
@@ -196,7 +169,7 @@ const BOX = `${BASE} min-h-36 resize-y border border-gold-500/80 px-4 py-3.5 lea
 
             <div class="mt-12 flex justify-center">
               <BaseButton type="submit" variant="solid" size="lg" :loading="status === 'submitting'">
-                {{ status === 'submitting' ? 'Enviando…' : 'Enviar solicitação' }}
+                {{ status === 'submitting' ? 'Enviando…' : 'Pedir orçamento' }}
               </BaseButton>
             </div>
           </form>

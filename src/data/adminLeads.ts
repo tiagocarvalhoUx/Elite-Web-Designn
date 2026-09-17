@@ -10,11 +10,12 @@ import { requireSupabase } from '@/lib/supabase'
  */
 
 const TABLE = 'leads'
+const LEGACY_NO_EMAIL = 'sem-email@elitewebdesigner.com.br'
 
 export interface Lead {
   readonly id: string
   readonly name: string
-  readonly email: string
+  readonly email: string | null
   readonly whatsapp: string
   readonly projectType: string
   readonly message: string
@@ -26,7 +27,7 @@ export interface Lead {
 interface LeadRow {
   id: string
   name: string
-  email: string
+  email: string | null
   whatsapp: string
   project_type: string
   message: string
@@ -43,7 +44,7 @@ function toLead(row: LeadRow): Lead {
   return {
     id: row.id,
     name: row.name,
-    email: row.email,
+    email: row.email === LEGACY_NO_EMAIL ? null : row.email,
     whatsapp: row.whatsapp,
     projectType: row.project_type,
     message: row.message,

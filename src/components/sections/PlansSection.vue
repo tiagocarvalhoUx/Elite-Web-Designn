@@ -119,33 +119,27 @@ import AppIcon from '@/components/ui/AppIcon.vue'
             -->
             <div class="mt-auto pt-10">
               <BaseButton
-                href="#contato"
+                :href="whatsappUrlWith(planMessage(plan))"
                 class="w-full"
                 size="lg"
-                :variant="plan.featured ? 'solid' : 'outline'"
-                pixel-event="CliqueOrcamento"
-                :pixel-label="`Contratar plano ${plan.name}`"
-                @click="choosePlan(plan)"
+                variant="solid"
+                external
               >
-                Contratar
+                <AppIcon name="whatsapp" :size="16" />
+                Falar no WhatsApp
               </BaseButton>
 
-              <!--
-                Segundo caminho, deliberadamente discreto: o formulário grava o
-                lead no banco e é o destino principal. Quem prefere falar agora
-                abre o WhatsApp com o plano já escrito — a conversa chega
-                iniciada pelo cliente, com o contexto dentro.
-              -->
-              <a
-                :href="whatsappUrlWith(planMessage(plan))"
-                target="_blank"
-                rel="noopener noreferrer"
-                :aria-label="`Falar no WhatsApp sobre o plano ${plan.name}`"
-                class="mt-4 flex items-center justify-center gap-2 text-[0.68rem] font-medium tracking-luxe text-muted uppercase transition-colors duration-300 ease-luxe hover:text-gold-300"
+              <BaseButton
+                href="#contato"
+                class="mt-4 w-full"
+                size="lg"
+                variant="outline"
+                pixel-event="CliqueOrcamento"
+                :pixel-label="`Pedir orçamento — plano ${plan.name}`"
+                @click="choosePlan(plan)"
               >
-                <AppIcon name="whatsapp" :size="14" />
-                Falar no WhatsApp
-              </a>
+                Pedir orçamento
+              </BaseButton>
             </div>
           </article>
         </li>

@@ -23,7 +23,7 @@ export interface PlanIntent {
 const intent = ref<PlanIntent | null>(null)
 let counter = 0
 
-/** Texto que o campo "Mensagem" recebe: o plano inteiro, item por item. */
+/** Mensagem contextual usada nos links de WhatsApp de cada plano. */
 export function planMessage(plan: Plan): string {
   return [
     `Olá! Tenho interesse no plano ${plan.name} — R$ ${plan.price}.`,

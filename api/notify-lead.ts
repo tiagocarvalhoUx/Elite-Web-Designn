@@ -18,6 +18,7 @@ interface LeadPayload {
   email?: unknown
   whatsapp?: unknown
   projectType?: unknown
+  company?: unknown
   message?: unknown
   plan?: unknown
   source?: unknown
@@ -69,18 +70,25 @@ export default async function handler(request: Request): Promise<Response> {
   const email = str(payload.email, 160)
   const whatsapp = str(payload.whatsapp, 40)
   const projectType = str(payload.projectType, 60)
+  const company = str(payload.company, 160)
   const message = str(payload.message, 4000)
   const plan = str(payload.plan, 60)
   const source = str(payload.source, 300)
 
-  if (!name || !email || !message) {
+  if (!name || !whatsapp || !projectType || !message) {
     return new Response('Campos obrigatórios ausentes', { status: 400 })
   }
 
   const rows: Array<[string, string]> = [
     ...(plan ? ([['Plano', `<strong>${escapeHtml(plan)}</strong>`]] as Array<[string, string]>) : []),
     ['Nome', escapeHtml(name)],
-    ['E-mail', `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`],
+    ...(company ? ([['Empresa', escapeHtml(company)]] as Array<[string, string]>) : []),
+    ...(email
+      ? ([['E-mail', `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`]] as Array<[
+          string,
+          string,
+        ]>)
+      : []),
     [
       'WhatsApp',
       `<a href="${whatsappLink(whatsapp, name)}">${escapeHtml(whatsapp)}</a> — clique para responder`,
@@ -103,7 +111,7 @@ export default async function handler(request: Request): Promise<Response> {
           )
           .join('')}
       </table>
-      <p style="margin:24px 0 8px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#c99b3b">Mensagem</p>
+      <p style="margin:24px 0 8px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:#c99b3b">Resumo da solicitação</p>
       <p style="margin:0;font-size:14px;line-height:1.7;white-space:pre-line;color:#ddd2c0">${escapeHtml(message)}</p>
       ${source ? `<p style="margin:24px 0 0;font-size:12px;color:#9c9182">Origem: ${escapeHtml(source)}</p>` : ''}
     </div>`
@@ -119,12 +127,13 @@ export default async function handler(request: Request): Promise<Response> {
     '',
     ...(plan ? [`Plano: ${plan}`] : []),
     `Nome: ${name}`,
-    `E-mail: ${email}`,
+    ...(company ? [`Empresa: ${company}`] : []),
+    ...(email ? [`E-mail: ${email}`] : []),
     `WhatsApp: ${whatsapp}`,
     `Responder no WhatsApp: ${whatsappLink(whatsapp, name)}`,
     `Tipo de projeto: ${projectType}`,
     '',
-    'Mensagem:',
+    'Resumo da solicitação:',
     message,
     ...(source ? ['', `Origem: ${source}`] : []),
   ].join('\n')
@@ -138,8 +147,8 @@ export default async function handler(request: Request): Promise<Response> {
     body: JSON.stringify({
       from: process.env['LEAD_NOTIFY_FROM'] || 'Elite Web Designer <onboarding@resend.dev>',
       to: [to],
-      // Responder o e-mail vai direto para o cliente, sem copiar endereço.
-      reply_to: email,
+      // Em leads antigos com e-mail, responder vai direto para o cliente.
+      ...(email ? { reply_to: email } : {}),
       /*
        * O plano vem primeiro por causa da notificação do celular: o texto é
        * cortado depois de poucas palavras, e é ele que decide se vale

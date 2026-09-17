@@ -30,8 +30,8 @@ export const isPixelEnabled = Boolean(PIXEL_ID)
 
 let booted = false
 
-/** Snippet oficial do Meta, com a fila criada antes do script chegar. */
-function injectScript(): void {
+/** Cria imediatamente a fila oficial, antes de qualquer clique poder acontecer. */
+function createQueue(): void {
   if (window.fbq) return
 
   const fbq = function (...args: unknown[]) {
@@ -44,7 +44,11 @@ function injectScript(): void {
   fbq.loaded = true
   window.fbq = fbq
   window._fbq = fbq
+}
 
+/** Baixa o SDK fora do caminho crítico; os eventos anteriores já estão na fila. */
+function loadScript(): void {
+  if (document.querySelector('script[src*="connect.facebook.net/"][src$="fbevents.js"]')) return
   const script = document.createElement('script')
   script.async = true
   script.src = 'https://connect.facebook.net/en_US/fbevents.js'
@@ -91,13 +95,20 @@ export function identify(data: { email?: string; phone?: string }): void {
   if (Object.keys(match).length) window.fbq('init', PIXEL_ID, match)
 }
 
-/** Cliques em WhatsApp viram `Contact`, sem precisar tocar em cada link. */
+/**
+ * Cliques em WhatsApp viram o evento padrão `Contact`, exibido como
+ * "Entrar em contato" no Gerenciador de Eventos em português.
+ */
 function watchWhatsAppClicks(): void {
   document.addEventListener(
     'click',
     (event) => {
       const link = (event.target as Element | null)?.closest?.('a[href*="wa.me"]')
-      if (link) track('Contact', { content_name: 'WhatsApp' })
+      if (link)
+        track('Contact', {
+          content_name: 'Falar no WhatsApp',
+          content_category: 'Entrar em contato',
+        })
     },
     { passive: true, capture: true },
   )
@@ -107,12 +118,12 @@ export function initPixel(): void {
   if (!PIXEL_ID || booted) return
   booted = true
 
-  const start = () => {
-    injectScript()
-    window.fbq?.('init', PIXEL_ID)
-    track('PageView')
-    watchWhatsAppClicks()
-  }
+  // A fila e o listener nascem agora: um clique rápido no CTA não se perde.
+  // Apenas o download do SDK pesado fica adiado.
+  createQueue()
+  window.fbq?.('init', PIXEL_ID)
+  track('PageView')
+  watchWhatsAppClicks()
 
   // Fora do caminho crítico: o pixel nunca disputa com a primeira pintura.
   //
@@ -123,8 +134,8 @@ export function initPixel(): void {
   // Ler a função direto evita estreitar `window`.
   const scheduleIdle = window.requestIdleCallback
   if (scheduleIdle) {
-    scheduleIdle(start, { timeout: 3500 })
+    scheduleIdle(loadScript, { timeout: 3500 })
   } else {
-    window.setTimeout(start, 1500)
+    window.setTimeout(loadScript, 1500)
   }
 }

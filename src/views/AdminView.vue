@@ -445,7 +445,8 @@ async function onRemove(project: AdminProject): Promise<void> {
             <p class="mt-4 border-y border-gold-500/15 py-4 text-sm leading-relaxed text-sand whitespace-pre-line">{{ lead.message }}</p>
 
             <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-              <a :href="`mailto:${lead.email}`" class="text-gold-300 hover:text-gold-200">{{ lead.email }}</a>
+              <a v-if="lead.email" :href="`mailto:${lead.email}`" class="text-gold-300 hover:text-gold-200">{{ lead.email }}</a>
+              <span v-else class="text-muted">E-mail não informado</span>
               <a :href="whatsappLink(lead)" target="_blank" rel="noopener noreferrer" class="text-gold-300 hover:text-gold-200">
                 {{ lead.whatsapp }} — responder no WhatsApp ↗
               </a>

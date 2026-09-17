@@ -14,12 +14,13 @@ const URL_BASE = import.meta.env['VITE_SUPABASE_URL'] as string | undefined
 const KEY = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] as string | undefined
 
 export const canStoreLeads = Boolean(URL_BASE && KEY)
+const LEGACY_NO_EMAIL = 'sem-email@elitewebdesigner.com.br'
 
 export interface LeadInput {
   name: string
-  email: string
   whatsapp: string
   projectType: string
+  company?: string
   message: string
   /**
    * Plano escolhido, quando veio pela seção de planos. Só viaja no aviso por
@@ -37,28 +38,44 @@ export interface LeadInput {
 export async function submitLead(input: LeadInput): Promise<void> {
   if (!URL_BASE || !KEY) throw new Error('Supabase não configurado.')
 
-  const response = await fetch(`${URL_BASE}/rest/v1/leads`, {
-    method: 'POST',
-    headers: {
-      apikey: KEY,
-      Authorization: `Bearer ${KEY}`,
-      'Content-Type': 'application/json',
-      // Sem `return=representation` a resposta vem vazia — não queremos que a
-      // API devolva o lead recém-criado, já que anon não pode lê-los.
-      Prefer: 'return=minimal',
-    },
-    body: JSON.stringify({
+  const payload = (email: string | null) => ({
       name: input.name.trim(),
-      email: input.email.trim().toLowerCase(),
+      email,
       whatsapp: input.whatsapp.trim(),
       project_type: input.projectType,
       message: input.message.trim(),
       source: typeof window === 'undefined' ? null : window.location.href,
-    }),
   })
 
+  const insert = (email: string | null) =>
+    fetch(`${URL_BASE}/rest/v1/leads`, {
+      method: 'POST',
+      headers: {
+        apikey: KEY,
+        Authorization: `Bearer ${KEY}`,
+        'Content-Type': 'application/json',
+        // Sem `return=representation` a resposta vem vazia — não queremos que a
+        // API devolva o lead recém-criado, já que anon não pode lê-los.
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify(payload(email)),
+    })
+
+  let response = await insert(null)
+  let detail = response.ok ? '' : await response.text().catch(() => '')
+
+  /*
+   * Compatibilidade durante a migração: bancos que ainda exigem `email`
+   * rejeitam o primeiro INSERT antes de gravar qualquer linha. Repetimos com
+   * um marcador reconhecível, que o painel oculta. Assim o novo formulário não
+   * perde leads enquanto o schema.sql ainda não foi reaplicado.
+   */
+  if (!response.ok && /email/i.test(detail) && /null|not-null|23502/i.test(detail)) {
+    response = await insert(LEGACY_NO_EMAIL)
+    detail = response.ok ? '' : await response.text().catch(() => '')
+  }
+
   if (!response.ok) {
-    const detail = await response.text().catch(() => '')
     throw new Error(`Falha ao registrar a solicitação (HTTP ${response.status}). ${detail}`.trim())
   }
 
@@ -77,9 +94,9 @@ async function notifyByEmail(input: LeadInput): Promise<void> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: input.name.trim(),
-        email: input.email.trim(),
         whatsapp: input.whatsapp.trim(),
         projectType: input.projectType,
+        company: input.company?.trim() ?? '',
         message: input.message.trim(),
         plan: input.plan ?? '',
         source: typeof window === 'undefined' ? '' : window.location.href,

@@ -16,7 +16,7 @@ export interface SocialLink {
 const WHATSAPP_E164 = '5518981142927'
 
 export const WHATSAPP_MESSAGE =
-  'Olá! Vim pelo site da Elite Web Designer e gostaria de solicitar uma proposta.'
+  'Olá, vim do site e quero saber mais sobre os planos'
 
 /**
  * Link do WhatsApp com a mensagem já escrita.

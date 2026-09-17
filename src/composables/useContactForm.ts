@@ -2,22 +2,21 @@ import { computed, reactive, ref, watch } from 'vue'
 import { site } from '@/data/site'
 import { identify, track } from '@/lib/metaPixel'
 import { canStoreLeads, submitLead } from '@/data/leads'
-import { planMessage, usePlanIntent } from '@/composables/usePlanIntent'
+import { usePlanIntent } from '@/composables/usePlanIntent'
 
 export interface ContactFields {
   name: string
-  email: string
   whatsapp: string
   projectType: string
-  message: string
-  /** Honeypot: preenchido apenas por bots. */
+  /** Opcional e visível no formulário. */
   company: string
+  /** Honeypot: preenchido apenas por bots. */
+  website: string
 }
 
-export type FieldName = Exclude<keyof ContactFields, 'company'>
+export type FieldName = 'name' | 'whatsapp' | 'projectType'
 export type FormStatus = 'idle' | 'submitting' | 'success' | 'error'
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i
 const MIN_PHONE_DIGITS = 10
 
 /**
@@ -43,62 +42,32 @@ export function maskPhone(value: string): string {
 export function useContactForm() {
   const fields = reactive<ContactFields>({
     name: '',
-    email: '',
     whatsapp: '',
     projectType: '',
-    message: '',
     company: '',
+    website: '',
   })
 
   const touched = reactive<Record<FieldName, boolean>>({
     name: false,
-    email: false,
     whatsapp: false,
     projectType: false,
-    message: false,
   })
 
   const status = ref<FormStatus>('idle')
   const submitAttempted = ref(false)
 
-  /*
-   * Bloco de texto e tipo de projeto que este mecanismo escreveu por último.
-   * Guardá-los é o que permite trocar de plano sem apagar nada: o bloco do
-   * plano ocupa sempre o começo da mensagem, e o que a pessoa escreveu embaixo
-   * dele continua onde estava.
-   */
-  let autoMessage = ''
   let autoType = ''
 
   const planIntent = usePlanIntent()
 
-  /**
-   * Plano a anunciar no assunto do aviso — e é por isso que ele depende do
-   * texto ainda começar pelo bloco gerado. Quem escolheu um plano e depois
-   * reescreveu a mensagem inteira não está mais falando daquele plano, e um
-   * assunto afirmando o contrário levaria a conversa para o lugar errado.
-   */
   function chosenPlan(): string | undefined {
-    if (!autoMessage || !fields.message.startsWith(autoMessage)) return undefined
     return planIntent.value?.plan.name
   }
 
   watch(planIntent, (intent) => {
     if (!intent) return
     const { plan } = intent
-
-    const block = planMessage(plan)
-    // Ou o bloco anterior é trocado no lugar, ou o novo entra por cima do que
-    // já havia — nunca por cima do texto de quem está escrevendo.
-    const rest =
-      autoMessage && fields.message.startsWith(autoMessage)
-        ? fields.message.slice(autoMessage.length)
-        : fields.message.trim()
-          ? `\n\n${fields.message}`
-          : ''
-
-    autoMessage = block
-    fields.message = block + rest
 
     if (!fields.projectType || fields.projectType === autoType) {
       autoType = plan.projectType
@@ -114,11 +83,9 @@ export function useContactForm() {
     const next: Partial<Record<FieldName, string>> = {}
 
     if (fields.name.trim().length < 2) next.name = 'Informe seu nome completo.'
-    if (!EMAIL_RE.test(fields.email.trim())) next.email = 'Informe um e-mail válido.'
     if (digitsOf(fields.whatsapp).length < MIN_PHONE_DIGITS)
       next.whatsapp = 'Informe o WhatsApp com DDD.'
     if (!fields.projectType) next.projectType = 'Selecione o tipo de projeto.'
-    if (fields.message.trim().length < 10) next.message = 'Conte um pouco mais sobre o projeto.'
 
     return next
   })
@@ -141,26 +108,33 @@ export function useContactForm() {
   function buildBody(): string {
     return [
       `Nome: ${fields.name.trim()}`,
-      `E-mail: ${fields.email.trim()}`,
       `WhatsApp: ${fields.whatsapp.trim()}`,
       `Tipo de projeto: ${fields.projectType}`,
-      '',
-      fields.message.trim(),
+      ...(fields.company.trim() ? [`Empresa: ${fields.company.trim()}`] : []),
+      ...(chosenPlan() ? [`Plano de interesse: ${chosenPlan()}`] : []),
+    ].join('\n')
+  }
+
+  /** Resumo interno para manter o lead legível no painel, sem pedir texto livre. */
+  function leadSummary(): string {
+    return [
+      `Solicitação enviada pelo formulário rápido.`,
+      `Tipo de projeto: ${fields.projectType}`,
+      ...(fields.company.trim() ? [`Empresa: ${fields.company.trim()}`] : []),
+      ...(chosenPlan() ? [`Plano de interesse: ${chosenPlan()}`] : []),
     ].join('\n')
   }
 
   function reset(): void {
     Object.assign(fields, {
       name: '',
-      email: '',
       whatsapp: '',
       projectType: '',
-      message: '',
       company: '',
+      website: '',
     })
     ;(Object.keys(touched) as FieldName[]).forEach((key) => (touched[key] = false))
     submitAttempted.value = false
-    autoMessage = ''
     autoType = ''
   }
 
@@ -168,7 +142,7 @@ export function useContactForm() {
     if (status.value === 'submitting') return
     submitAttempted.value = true
 
-    if (fields.company) {
+    if (fields.website) {
       // Honeypot preenchido: encerra silenciosamente.
       status.value = 'success'
       return
@@ -198,10 +172,10 @@ export function useContactForm() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: fields.name.trim(),
-            email: fields.email.trim(),
             whatsapp: fields.whatsapp.trim(),
             projectType: fields.projectType,
-            message: fields.message.trim(),
+            company: fields.company.trim(),
+            message: leadSummary(),
             plan: chosenPlan(),
           }),
         })
@@ -209,10 +183,10 @@ export function useContactForm() {
       } else if (canStoreLeads) {
         await submitLead({
           name: fields.name,
-          email: fields.email,
           whatsapp: fields.whatsapp,
           projectType: fields.projectType,
-          message: fields.message,
+          company: fields.company,
+          message: leadSummary(),
           ...(chosenPlan() ? { plan: chosenPlan() as string } : {}),
         })
       } else {
@@ -225,7 +199,7 @@ export function useContactForm() {
       // A correspondência avançada usa o que a pessoa acabou de digitar; é o
       // que mais pesa na nota de qualidade do Meta. Precisa vir antes do
       // evento, senão o Lead sai sem esses dados.
-      identify({ email: fields.email, phone: fields.whatsapp })
+      identify({ phone: fields.whatsapp })
       track('Lead', {
         content_name: fields.projectType || 'Solicitação de proposta',
         content_category: 'Contato',

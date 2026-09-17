@@ -163,7 +163,7 @@ create policy "portfolio_admin_delete"
 create table if not exists public.leads (
   id           uuid primary key default gen_random_uuid(),
   name         text        not null check (length(trim(name)) between 2 and 120),
-  email        text        not null check (length(trim(email)) between 5 and 160),
+  email        text        check (email is null or length(trim(email)) between 5 and 160),
   whatsapp     text        not null check (length(trim(whatsapp)) between 8 and 40),
   project_type text        not null check (length(trim(project_type)) between 2 and 60),
   message      text        not null check (length(trim(message)) between 10 and 4000),
@@ -172,6 +172,14 @@ create table if not exists public.leads (
   handled      boolean     not null default false,
   created_at   timestamptz not null default now()
 );
+
+-- O formulário rápido não solicita e-mail. Estas instruções também
+-- atualizam instalações existentes sem apagar os endereços já cadastrados.
+alter table public.leads alter column email drop not null;
+alter table public.leads drop constraint if exists leads_email_check;
+alter table public.leads
+  add constraint leads_email_check
+  check (email is null or length(trim(email)) between 5 and 160);
 
 create index if not exists leads_created_idx on public.leads (created_at desc);
 

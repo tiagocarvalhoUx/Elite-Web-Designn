@@ -75,7 +75,8 @@ estático de `src/data/portfolio.ts` — o mesmo vale se a API estiver fora do a
 **Para onde vai a solicitação**, em ordem de precedência:
 
 1. **`VITE_CONTACT_ENDPOINT`**, se definida em `.env.local` — `POST` com
-   `{ name, email, whatsapp, projectType, message }`. Use para mandar direto a
+   `{ name, whatsapp, projectType, company, message, plan }`. `company` é
+   opcional e `message` é um resumo gerado pelo site. Use para mandar direto a
    um CRM ou automação.
 2. **Supabase** (padrão) — grava na tabela `leads` e aparece em `/admin` →
    **Solicitações**.
@@ -87,15 +88,13 @@ estático de `src/data/portfolio.ts` — o mesmo vale se a API estiver fora do a
 > app nenhum, e mesmo abrindo a pessoa ainda precisa apertar "enviar". Leads
 > eram perdidos sem deixar rastro.
 
-Um honeypot (`company`) descarta envios automatizados antes da requisição.
+Um honeypot (`website`) descarta envios automatizados antes da requisição.
 
-**Vindo da seção de planos:** clicar em "Contratar" leva ao formulário já com o
-tipo de projeto selecionado e a mensagem escrita — o nome do plano, o valor e a
-lista completa de itens. O bloco do plano ocupa o começo da mensagem: trocar de
-plano substitui só esse trecho e preserva o que a pessoa tiver escrito abaixo
-dele. A caixa de texto cresce junto, para o texto caber na tela em vez de rolar.
+**Vindo da seção de planos:** "Pedir orçamento" leva ao formulário compacto
+já com o tipo de projeto selecionado. O plano escolhido segue no resumo interno
+do lead, sem exigir que a pessoa escreva uma mensagem.
 
-Cada plano tem também um **"Falar no WhatsApp"** discreto abaixo do botão, que
+Cada plano tem também um **"Falar no WhatsApp"** como ação principal, que
 abre a conversa com a mesma mensagem já escrita. É a via para quem não quer
 preencher formulário: a conversa chega iniciada pelo cliente, com o plano
 dentro, e não depende de API, número dedicado nem aprovação de modelo pela
@@ -166,8 +165,8 @@ No Gerenciador de Eventos, `AssistiuFilme` aparece em "Eventos personalizados"
 — para usá-lo em públicos ou otimização de campanha, crie um evento
 personalizado apontando para ele.
 
-**Correspondência avançada:** ao enviar o `Lead`, o e-mail e o WhatsApp que a
-pessoa acabou de digitar são normalizados e reenviados (`identify()` em
+**Correspondência avançada:** ao enviar o `Lead`, o WhatsApp que a pessoa
+acabou de digitar é normalizado e reenviado (`identify()` em
 `metaPixel.ts`) — é o que mais pesa na nota de "qualidade da correspondência"
 do Meta. O hash desses dados é feito pelo próprio script do Facebook, nunca
 pelo nosso código.
