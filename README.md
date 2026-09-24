@@ -138,6 +138,14 @@ continua visível em `/admin`.
 Sem `RESEND_API_KEY` configurada, a função responde 204 e nada acontece — o
 site funciona igual, só sem aviso.
 
+## Microsoft Clarity
+
+O ID do projeto (`yngnnfl2fm`, em **Settings → Setup** no painel do Clarity)
+já vem como padrão em `vite.config.ts`, então o código de gravação de sessões é
+inserido no `<head>` de todo build sem configuração extra. Para usar outro
+projeto, defina `VITE_CLARITY_PROJECT_ID`; para desligar num ambiente, defina a
+variável vazia (`VITE_CLARITY_PROJECT_ID=`). A rota `/admin` nunca é gravada.
+
 ## Meta Pixel (Facebook/Instagram Ads)
 
 **Configuração:**

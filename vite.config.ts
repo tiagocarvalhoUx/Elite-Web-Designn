@@ -85,6 +85,24 @@ function metaPixelNoscriptPlugin(pixelId: string | undefined): Plugin {
   }
 }
 
+/** ID público do projeto Clarity (aparece no HTML servido, não é segredo). */
+const DEFAULT_CLARITY_PROJECT_ID = 'yngnnfl2fm'
+
+/** Inclui o script no head apenas quando há um projeto Clarity configurado. */
+function clarityPlugin(projectId: string | undefined): Plugin {
+  return {
+    name: 'clarity',
+    transformIndexHtml: (html) => {
+      const block = /<!--CLARITY_START-->[\s\S]*?<!--CLARITY_END-->/
+      if (!projectId) return html.replace(block, '')
+      if (!/^[a-z0-9]+$/i.test(projectId)) {
+        throw new Error('VITE_CLARITY_PROJECT_ID deve conter apenas letras e números')
+      }
+      return html.replace('%CLARITY_PROJECT_ID%', projectId)
+    },
+  }
+}
+
 export default defineConfig(({ mode }) => {
   // Vite só popula `import.meta.env` automaticamente para o código do app —
   // o próprio arquivo de config roda em Node puro. `loadEnv` é o que lê
@@ -99,6 +117,8 @@ export default defineConfig(({ mode }) => {
       siteUrlPlugin(resolveSiteUrl(env)),
       supabasePreconnectPlugin(env['VITE_SUPABASE_URL']),
       metaPixelNoscriptPlugin(env['VITE_META_PIXEL_ID']),
+      // Variável vazia (VITE_CLARITY_PROJECT_ID=) desliga o Clarity nesse ambiente.
+      clarityPlugin(env['VITE_CLARITY_PROJECT_ID'] ?? DEFAULT_CLARITY_PROJECT_ID),
     ],
     resolve: {
       alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
