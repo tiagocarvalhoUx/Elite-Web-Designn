@@ -29,31 +29,31 @@ import SiteContainer from '@/components/ui/SiteContainer.vue'
           </span>
         </h1>
 
-        <GoldDivider
+        <BaseButton
           style="--reveal-delay: 160ms"
-          class="hero-in mt-6"
+          class="hero-in mt-7"
+          :href="site.whatsappUrl"
+          variant="solid"
+          size="lg"
+          external
+        >
+          Falar no WhatsApp
+        </BaseButton>
+
+        <GoldDivider
+          style="--reveal-delay: 220ms"
+          class="hero-in mt-7"
           :width="320"
         />
 
         <p
-          style="--reveal-delay: 200ms"
+          style="--reveal-delay: 260ms"
           class="hero-in mt-5 max-w-[38ch] font-display text-[clamp(1.1rem,2.1vw,1.45rem)] leading-relaxed text-balance text-sand"
         >
           Sites, lojas e aplicações desenvolvidos sob medida para marcas exigentes.
         </p>
 
-        <div
-          style="--reveal-delay: 260ms"
-          class="hero-in mt-7 flex flex-col items-center gap-5 sm:flex-row sm:gap-14"
-        >
-          <BaseButton
-            :href="site.whatsappUrl"
-            variant="solid"
-            size="lg"
-            external
-          >
-            Falar no WhatsApp
-          </BaseButton>
+        <div style="--reveal-delay: 320ms" class="hero-in mt-7">
           <BaseButton href="#projetos" variant="underline">Ver portfólio</BaseButton>
         </div>
       </div>
