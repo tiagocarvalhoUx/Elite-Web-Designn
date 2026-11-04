@@ -18,6 +18,46 @@ npm run video        # transcodifica o filme da marca (requer ffmpeg no PATH)
 npm run fonts        # rebaixa as fontes do Google para public/fonts
 ```
 
+## Deploy
+
+O site é hospedado no **Cloudflare Pages**, projeto `elite-web-designer`, nos
+domínios `elitewebdesignn.com` e `www.elitewebdesignn.com`.
+
+O deploy é por envio direto do build — não há integração com repositório Git,
+então publicar é sempre um ato explícito:
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name elite-web-designer --branch main
+```
+
+Três coisas que o Cloudflare espera e que vivem no repositório:
+
+| Arquivo | Para quê |
+|---|---|
+| [`functions/api/notify-lead.ts`](functions/api/notify-lead.ts) | Pages Function; vira o endpoint `/api/notify-lead` |
+| [`public/_redirects`](public/_redirects) | entrega `index.html` com status 200 em rotas desconhecidas |
+| [`public/_headers`](public/_headers) | cache dos assets e cabeçalhos de segurança |
+
+As variáveis de servidor são **secrets do projeto**, não arquivos. E têm uma
+armadilha que custa tempo: **um secret alterado só vale a partir do deploy
+seguinte** — mudar o valor no painel não afeta o que já está publicado.
+
+```bash
+npx wrangler pages secret list --project-name elite-web-designer
+npx wrangler pages secret put RESEND_API_KEY --project-name elite-web-designer
+```
+
+O prompt do `wrangler` não ecoa o que é digitado; se receber Enter vazio, ele
+grava uma string vazia sem reclamar, e o secret passa a existir com valor em
+branco. Para conferir sem expor nada, mande ao endpoint um corpo incompleto:
+`400` significa que a chave chegou, `204` que ela está vazia ou ausente.
+
+```bash
+curl -s -o /dev/null -w "%{http_code}
+" -X POST   -H "Content-Type: application/json" -d '{"name":"x"}'   https://elitewebdesignn.com/api/notify-lead
+```
+
 ## Onde mexer
 
 | Preciso mudar…                    | Arquivo                       |
@@ -108,14 +148,15 @@ Só administradores leem.
 ### Aviso por e-mail
 
 Além de gravar no banco, o site pode avisar por e-mail a cada nova solicitação.
-Isso roda numa função de servidor ([`api/notify-lead.ts`](api/notify-lead.ts))
+Isso roda numa função de servidor
+([`functions/api/notify-lead.ts`](functions/api/notify-lead.ts))
 porque a chave da API de e-mail **não pode ficar no frontend** — qualquer
 variável `VITE_*` é compilada dentro do bundle público.
 
 1. Crie uma conta gratuita em [resend.com](https://resend.com) (3.000 e-mails/mês).
 2. Gere uma API key.
-3. Na Vercel → **Settings** → **Environment Variables**, adicione — **sem
-   prefixo `VITE_`**, senão vazam para o navegador:
+3. Cadastre como secrets do projeto no Cloudflare — **sem prefixo `VITE_`**,
+   senão vazam para o navegador (veja [Deploy](#deploy)):
 
    | Nome | Valor |
    |---|---|
@@ -123,12 +164,17 @@ variável `VITE_*` é compilada dentro do bundle público.
    | `LEAD_NOTIFY_TO` | o e-mail que recebe os avisos |
    | `LEAD_NOTIFY_FROM` | opcional; veja a limitação abaixo |
 
-4. Redeploy.
+4. Publique de novo — sem um deploy novo, o secret não chega à função.
 
-> **Limitação do plano gratuito:** sem um domínio verificado, o Resend só envia
-> a partir de `onboarding@resend.dev` e **só para o e-mail dono da conta**. Para
-> mandar de `contato@seudominio.com.br` ou para outros destinatários, é preciso
-> verificar um domínio no painel do Resend.
+`elitewebdesignn.com` já está verificado no Resend (região `sa-east-1`, São
+Paulo), e `LEAD_NOTIFY_FROM` aponta para `contato@elitewebdesignn.com`. Os
+registros DKIM e SPF que sustentam isso vivem no DNS do domínio, no Cloudflare —
+`resend._domainkey` (TXT), `send` (MX e TXT) e `rsend` (CNAME, **DNS only**).
+Apagar qualquer um deles derruba a entrega sem aviso.
+
+> **Limitação do plano gratuito:** *sem* um domínio verificado, o Resend só envia
+> a partir de `onboarding@resend.dev` e **só para o e-mail dono da conta** — foi
+> assim antes da verificação, e é o que acontece se o DNS for desfeito.
 
 **O aviso é best-effort:** o lead é gravado no Supabase primeiro. Se o e-mail
 falhar, o formulário **não** acusa erro — o cliente já cumpriu a parte dele, e

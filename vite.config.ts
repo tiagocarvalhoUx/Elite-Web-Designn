@@ -10,17 +10,25 @@ import tailwindcss from '@tailwindcss/vite'
  * não resolvem caminho relativo. Com o endereço escrito à mão no HTML, ele
  * apontava para um domínio que ainda não existe e o preview não aparecia.
  *
- * A ordem abaixo faz o valor acompanhar o ambiente sozinho — inclusive quando
- * um domínio próprio for ligado na Vercel, sem precisar editar o código.
+ * A ordem abaixo faz o valor acompanhar o ambiente sozinho: VITE_SITE_URL tem
+ * a palavra final, as prévias de cada deploy usam o endereço que a plataforma
+ * publica, e o padrão é o domínio definitivo.
  */
 function resolveSiteUrl(env: Record<string, string>): string {
   const explicit = env['VITE_SITE_URL']
   if (explicit) return explicit.replace(/\/$/, '')
 
-  const vercel = process.env['VERCEL_PROJECT_PRODUCTION_URL']
-  if (vercel) return `https://${vercel.replace(/\/$/, '')}`
+  /*
+   * Prévias. Cada deploy do Cloudflare Pages que não é o de produção ganha um
+   * endereço *.pages.dev próprio; CF_PAGES_BRANCH distingue produção de prévia,
+   * porque só na prévia faz sentido abandonar o domínio definitivo — é lá que
+   * as metatags precisam apontar para o que está sendo revisado.
+   */
+  const cloudflare = process.env['CF_PAGES_URL']
+  const branch = process.env['CF_PAGES_BRANCH']
+  if (cloudflare && branch && branch !== 'main') return cloudflare.replace(/\/$/, '')
 
-  return 'https://elite-web-designn.vercel.app'
+  return 'https://elitewebdesignn.com'
 }
 
 /** Injeta o endereço no HTML e gera robots.txt e sitemap.xml com ele. */

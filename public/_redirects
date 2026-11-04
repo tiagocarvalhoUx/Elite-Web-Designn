@@ -1,0 +1,5 @@
+# SPA: qualquer rota desconhecida entrega o index.html com status 200 (não 404),
+# para o roteador do frontend assumir. O equivalente ao bloco "rewrites" que o
+# vercel.json usava. As Pages Functions (/api/*) são resolvidas antes desta
+# regra pelo Cloudflare, então o endpoint do formulário não é capturado aqui.
+/*    /index.html   200
