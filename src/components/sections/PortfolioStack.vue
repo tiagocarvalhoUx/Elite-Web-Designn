@@ -15,7 +15,7 @@
  * a experiência de "entrar no projeto e ver os mockups" não muda em nada.
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import type { PortfolioProject } from '@/data/portfolio'
+import { PROJECT_ASPECT, type PortfolioProject } from '@/data/portfolio'
 
 const props = defineProps<{ projects: readonly PortfolioProject[] }>()
 const emit = defineEmits<{ open: [project: PortfolioProject] }>()
@@ -165,7 +165,7 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
 </script>
 
 <template>
-  <div ref="section" class="portfolio-stack">
+  <div ref="section" class="portfolio-stack" :style="{ '--portfolio-ratio': PROJECT_ASPECT }">
     <div ref="sticky" class="portfolio-sticky">
       <header class="portfolio-intro">
         <p class="label-caps text-gold-400">Projetos selecionados</p>
@@ -229,6 +229,19 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
 .portfolio-stack {
   position: relative;
   background: var(--color-ink-950);
+
+  /*
+   * Proporção da arte do portfólio (2176x1300). A moldura é construída a
+   * partir dela em vez de esticar até as bordas disponíveis: quando a caixa
+   * tem proporção diferente da imagem, `object-fit: cover` preenche e
+   * descarta o excesso — e o excesso de uma arte 5:3 numa caixa quase
+   * quadrada são as laterais, exatamente onde ficam logo e título.
+   *
+   * O valor real vem de PROJECT_ASPECT, a mesma constante que dimensiona os
+   * cartões da grade — uma proporção só para as duas vitrines. O literal
+   * abaixo é apenas a reserva para antes do Vue montar.
+   */
+  --portfolio-ratio: 2176 / 1300;
 }
 
 .portfolio-sticky {
@@ -314,8 +327,17 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
   z-index: 2;
   left: 16px;
   right: 16px;
-  top: 41%;
-  bottom: 7%;
+  /*
+   * Ancorada pelo centro, não por topo e base: é a proporção que decide a
+   * altura. O max-height guarda o caso de tela baixa, onde a largura
+   * disponível pediria uma altura que não cabe.
+   */
+  top: 67%;
+  bottom: auto;
+  height: auto;
+  aspect-ratio: var(--portfolio-ratio);
+  max-height: 52%;
+  translate: 0 -50%;
   overflow: hidden;
   perspective: 1100px;
   perspective-origin: center 72%;
@@ -363,8 +385,14 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  /*
+   * `contain` e não `cover`: com a moldura na mesma proporção da arte os dois
+   * dariam o mesmo resultado, mas `contain` é o que garante que nenhuma peça
+   * perca texto se um dia entrar uma imagem de proporção diferente — falha
+   * visível (uma tarja) em vez de silenciosa (um título cortado).
+   */
+  object-fit: contain;
+  object-position: center;
   will-change: transform;
 }
 
@@ -442,7 +470,13 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
   }
   .portfolio-intro h2 { font-size: clamp(2.8rem, 5.2vw, 5.8rem); max-width: none; margin-bottom: 18px; }
   .portfolio-lead { font-size: clamp(0.92rem, 1.1vw, 1.05rem); max-width: 32ch; }
-  .portfolio-pages { left: 50%; right: clamp(24px, 4vw, 64px); top: clamp(112px, 13svh, 142px); bottom: clamp(66px, 8svh, 86px); }
+  .portfolio-pages {
+    left: 50%;
+    right: clamp(24px, 4vw, 64px);
+    top: 50%;
+    bottom: auto;
+    max-height: 72svh;
+  }
   .portfolio-status { right: clamp(24px, 5vw, 76px); bottom: clamp(20px, 3svh, 34px); }
   .portfolio-status i { width: 90px; }
 }
@@ -452,13 +486,23 @@ function choreograph(gsap: Gsap, ScrollTrigger: Trigger): void {
   .portfolio-intro { position: relative; inset: auto; width: auto; height: auto; display: block; margin-bottom: 36px; }
   .portfolio-copy-inner { margin-top: 28px; padding: 0; }
   .portfolio-lead { display: block; margin-top: 18px; -webkit-line-clamp: unset; }
-  .portfolio-pages { position: relative; inset: auto; display: grid; gap: 24px; overflow: visible; }
+  .portfolio-pages {
+    position: relative;
+    inset: auto;
+    display: grid;
+    gap: 24px;
+    overflow: visible;
+    height: auto;
+    aspect-ratio: auto;
+    max-height: none;
+    translate: none;
+  }
   .portfolio-sheet {
     position: relative;
     inset: auto;
     width: 100%;
     max-width: 1000px;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: var(--portfolio-ratio);
     height: auto;
     transform: none !important;
     justify-self: center;
