@@ -36,7 +36,7 @@ export const site = {
   tagline: 'Presença digital de excelência',
   location: 'Araçatuba — SP, Brasil',
   locationShort: 'Araçatuba — Brasil',
-  email: 'eliteprimestoreselite@gmail.com',
+  email: 'contato@elitewebdesignn.com',
   phoneDisplay: '(18) 98114-2927',
   whatsappUrl: whatsappUrlWith(WHATSAPP_MESSAGE),
   foundedYear: 2024,
